@@ -1,40 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle Game</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Puzzle Game — Hidden-ring Tic-Tac-Toe</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="container">
 
-<div id="code-section">
-    <h2>Enter Access Code</h2>
-    <input type="text" id="access-code" placeholder="Enter code here">
-    <button id="submit-code">Submit</button>
-</div>
+    <header>
+      <h1>Puzzle Chain</h1>
+      <p class="subtitle">Enter the access code to unlock Puzzle 1.</p>
+    </header>
 
-<div id="puzzle-section" style="display:none;">
-    <h2>Puzzle 1 – Naughts and Crosses</h2>
-    <div id="board"></div>
-    <div id="status"></div>
-    <button id="reset-btn">Reset</button>
-</div>
+    <section id="code-section" class="card">
+      <div class="row">
+        <input id="access-code" type="text" placeholder="Enter code (five letters)">
+        <button id="submit-code">Submit</button>
+      </div>
+      <p id="code-hint" class="hint">Hint: it's a five-letter name.</p>
+    </section>
 
-<!-- Placeholder for future puzzles -->
-<div id="placeholder-puzzles" style="display:none;">
-    <h2>Puzzle 2</h2>
-    <p>Coming soon...</p>
-    <h2>Puzzle 3</h2>
-    <p>Coming soon...</p>
-    <h2>Puzzle 4</h2>
-    <p>Coming soon...</p>
-    <h2>Puzzle 5</h2>
-    <p>Coming soon...</p>
-    <h2>Puzzle 6</h2>
-    <p>Coming soon...</p>
-</div>
+    <section id="puzzle-section" class="card hidden">
+      <h2>Puzzle 1 — Hidden-ring Noughts & Crosses</h2>
+      <p class="small">You are O. CPU (X) goes first and places X in the centre. Only the central 3×3 is visible. Outer ring squares are invisible until revealed.</p>
 
-<script src="script.js"></script>
+      <div id="board" class="board" aria-label="game board"></div>
+
+      <div class="controls">
+        <div id="status" class="status">Enter a move by clicking a visible square.</div>
+        <div class="spacer"></div>
+        <button id="reset-btn">Reset</button>
+      </div>
+    </section>
+
+    <section id="placeholders" class="card hidden">
+      <h3>Next puzzles (placeholders)</h3>
+      <div class="placeholder">Puzzle 2 — [empty]</div>
+      <div class="placeholder">Puzzle 3 — [empty]</div>
+      <div class="placeholder">Puzzle 4 — [empty]</div>
+      <div class="placeholder">Puzzle 5 — [empty]</div>
+      <div class="placeholder">Puzzle 6 — [empty]</div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
