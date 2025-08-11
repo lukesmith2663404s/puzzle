@@ -1,32 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Puzzle Game</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="code-section">
-  <input type="text" id="code-input" placeholder="Enter code">
-  <button onclick="checkCode()">Submit</button>
+    <h2>Enter Access Code</h2>
+    <input type="text" id="access-code" placeholder="Enter code here">
+    <button id="submit-code">Submit</button>
 </div>
 
-<div id="puzzles" style="display:none;">
-  <!-- Puzzle 1 -->
-  <div class="puzzle" id="puzzle1">
-    <h2>Puzzle 1: Naughts and Crosses</h2>
-    <div id="message"></div>
-    <div class="board" id="board"></div>
-    <button id="reset" onclick="resetGame()">Reset</button>
-  </div>
+<div id="puzzle-section" style="display:none;">
+    <h2>Puzzle 1 – Naughts and Crosses</h2>
+    <div id="board"></div>
+    <div id="status"></div>
+    <button id="reset-btn">Reset</button>
+</div>
 
-  <!-- Placeholder puzzles -->
-  <div class="puzzle"><h2>Puzzle 2</h2><p>Coming soon...</p></div>
-  <div class="puzzle"><h2>Puzzle 3</h2><p>Coming soon...</p></div>
-  <div class="puzzle"><h2>Puzzle 4</h2><p>Coming soon...</p></div>
-  <div class="puzzle"><h2>Puzzle 5</h2><p>Coming soon...</p></div>
-  <div class="puzzle"><h2>Puzzle 6</h2><p>Coming soon...</p></div>
+<!-- Placeholder for future puzzles -->
+<div id="placeholder-puzzles" style="display:none;">
+    <h2>Puzzle 2</h2>
+    <p>Coming soon...</p>
+    <h2>Puzzle 3</h2>
+    <p>Coming soon...</p>
+    <h2>Puzzle 4</h2>
+    <p>Coming soon...</p>
+    <h2>Puzzle 5</h2>
+    <p>Coming soon...</p>
+    <h2>Puzzle 6</h2>
+    <p>Coming soon...</p>
 </div>
 
 <script src="script.js"></script>
