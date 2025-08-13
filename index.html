@@ -1,51 +1,589 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Puzzle Game — Hidden-ring Tic-Tac-Toe</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Puzzle Gate — JONES</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0b0d10;
+    --panel: #12151b;
+    --muted: #6b7280;
+    --text: #e5e7eb;
+    --accent: #60a5fa;
+    --accent-2: #34d399;
+    --danger: #ef4444;
+    --grid: #2a2f3a;
+    --tile: #1a1f29;
+    --tile-hover: #222836;
+    --win: #22c55e;
+    --lose: #ef4444;
+    --tie: #fbbf24;
+    --invis: var(--bg); /* exactly background to be undetectable */
+    --radius: 16px;
+    --shadow: 0 10px 30px rgba(0,0,0,.45);
+  }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: radial-gradient(1200px 800px at 70% -10%, #0f1220 0%, var(--bg) 55%) fixed;
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .wrap {
+    max-width: 980px; margin: 0 auto; padding: 48px 20px 96px;
+  }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    margin-bottom: 28px;
+  }
+  .brand {
+    font-weight: 800; letter-spacing: .6px; font-size: 18px;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .tag {
+    padding: 2px 10px; border-radius: 999px; background: #0e1726; color: var(--muted);
+    border: 1px solid #1e2633; font-size: 12px;
+  }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--panel);
+    border: 1px solid #1f2532; border-radius: var(--radius); box-shadow: var(--shadow);
+  }
+
+  /* --- Code gate --- */
+  #gate {
+    padding: 28px; display: grid; gap: 18px; place-items: center; text-align: center;
+  }
+  #codeSlots {
+    display: grid; grid-template-columns: repeat(5, 54px); gap: 10px; margin-top: 8px;
+  }
+  .slot {
+    width: 54px; height: 64px; background: var(--tile); border: 1px solid #2a3444; border-radius: 12px;
+    display: grid; place-items: center; font-weight: 800; font-size: 28px; letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .slot input {
+    width: 100%; height: 100%; border: 0; outline: none; background: transparent; color: var(--text);
+    text-align: center; font: inherit; caret-color: var(--accent);
+  }
+  .hint { color: var(--muted); font-size: 14px; }
+
+  .reveal {
+    opacity: 0; transform: translateY(8px); transition: .5s ease;
+  }
+  .reveal.show { opacity: 1; transform: translateY(0); }
+
+  /* --- Puzzle list scaffold --- */
+  #puzzles { display: none; }
+  #puzzles.active { display: grid; gap: 18px; }
+  .puzzle-card { padding: 20px; }
+  .puzzle-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px;
+  }
+  .puzzle-title { font-weight: 700; }
+  .pill {
+    border: 1px solid #233045; background: #0f1522; color: var(--muted); border-radius: 999px; padding: 4px 10px; font-size: 12px;
+  }
+  .pill.solved { color: var(--accent-2); border-color: rgba(52,211,153,.3); }
+  .pill.locked { color: #9ca3af; opacity: .75; }
+  .actions { display: flex; gap: 12px; }
+
+  button.btn {
+    border: 1px solid #2a3444; background: #0f1522; color: var(--text); border-radius: 12px;
+    padding: 10px 14px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 0 rgba(255,255,255,.02) inset;
+    transition: transform .02s ease, background .2s ease, border-color .2s ease;
+  }
+  button.btn:hover { background: #121a2b; }
+  button.btn:active { transform: translateY(1px); }
+  button.btn.primary { background: #12223a; border-color: #1d3b63; }
+  button.btn.success { background: #0f2a22; border-color: #1e4c3d; color: #c7f9e5; }
+
+  /* --- Puzzle 1: Tic-tac-toe + secret ring --- */
+  .t3-wrap { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .board {
+    width: min(92vw, 520px); aspect-ratio: 1 / 1; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr);
+    gap: 10px; /* gap is only for visible cells; outer cells will blend into bg color */
+    position: relative;
+  }
+
+  .cell {
+    border-radius: 14px;
+    display: grid; place-items: center;
+    font-weight: 900; font-size: clamp(28px, 8vw, 62px);
+    user-select: none;
+    transition: background .15s ease, transform .02s ease;
+  }
+  .cell.visible {
+    background: var(--tile); border: 1px solid var(--grid);
+  }
+  .cell.visible:hover { background: var(--tile-hover); cursor: pointer; }
+  .cell.visible.filled { cursor: default; opacity: .95; }
+
+  /* Outer ring cells: truly undetectable initially */
+  .cell.outer {
+    background: var(--invis); border: none !important; box-shadow: none !important;
+    pointer-events: none; /* disabled until allowed */
+    cursor: default;
+  }
+  /* no hover/focus indicators for outer at any time */
+  .cell.outer:focus, .cell.outer:focus-visible { outline: none; }
+
+  /* When we enable the ring after game end */
+  .board.outer-enabled .cell.outer {
+    pointer-events: auto; /* clickable but still invisible */
+  }
+  .board.outer-enabled .cell.outer:hover { cursor: pointer; }
+
+  .mark { transform: translateY(-2px); letter-spacing: 2px; }
+  .mark.x { color: #93c5fd; }
+  .mark.o { color: #a7f3d0; }
+
+  .status {
+    text-align: center; padding: 10px 12px; border-radius: 12px; border: 1px solid #253044; background: #0f1522;
+    font-weight: 600;
+  }
+  .status.win { border-color: rgba(34,197,94,.35); color: #bef7d0; }
+  .status.lose { border-color: rgba(239,68,68,.35); color: #fecaca; }
+  .status.tie { border-color: rgba(251,191,36,.35); color: #fde68a; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-
+  <div class="wrap">
     <header>
-      <h1>Puzzle Chain</h1>
-      <p class="subtitle">Enter the access code to unlock Puzzle 1.</p>
+      <div class="brand">
+        🧩 Puzzle Gate
+        <span class="tag">Dark mode</span>
+      </div>
+      <div class="tag">Code required</div>
     </header>
 
-    <section id="code-section" class="card">
-      <div class="row">
-        <input id="access-code" type="text" placeholder="Enter code (five letters)">
-        <button id="submit-code">Submit</button>
+    <!-- CODE GATE -->
+    <section id="gate" class="panel">
+      <div>
+        <h2>Enter Access Code</h2>
+        <p class="hint">5 letters. It starts dark. When you know, you know.</p>
       </div>
-      <p id="code-hint" class="hint">Hint: it's a five-letter name.</p>
-    </section>
-
-    <section id="puzzle-section" class="card hidden">
-      <h2>Puzzle 1 — Hidden-ring Noughts & Crosses</h2>
-      <p class="small">You are O. CPU (X) goes first and places X in the centre. Only the central 3×3 is visible. Outer ring squares are invisible until revealed.</p>
-
-      <div id="board" class="board" aria-label="game board"></div>
-
-      <div class="controls">
-        <div id="status" class="status">Enter a move by clicking a visible square.</div>
-        <div class="spacer"></div>
-        <button id="reset-btn">Reset</button>
+      <div id="codeSlots" aria-label="5 character code entry">
+        <div class="slot"><input inputmode="latin" maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Code letter 1"></div>
+        <div class="slot"><input maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Code letter 2"></div>
+        <div class="slot"><input maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Code letter 3"></div>
+        <div class="slot"><input maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Code letter 4"></div>
+        <div class="slot"><input maxlength="1" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Code letter 5"></div>
       </div>
+      <div class="hint">Tip: Use keyboard; it auto-advances.</div>
+      <div id="gateMsg" class="reveal hint" role="status" aria-live="polite"></div>
     </section>
 
-    <section id="placeholders" class="card hidden">
-      <h3>Next puzzles (placeholders)</h3>
-      <div class="placeholder">Puzzle 2 — [empty]</div>
-      <div class="placeholder">Puzzle 3 — [empty]</div>
-      <div class="placeholder">Puzzle 4 — [empty]</div>
-      <div class="placeholder">Puzzle 5 — [empty]</div>
-      <div class="placeholder">Puzzle 6 — [empty]</div>
-    </section>
+    <!-- PUZZLES -->
+    <section id="puzzles" class="reveal">
+      <!-- Puzzle 1 -->
+      <article class="puzzle-card panel" id="p1">
+        <div class="puzzle-header">
+          <div class="puzzle-title">Puzzle 1 — Noughts & Crosses (unwinnable)</div>
+          <div class="pill" id="p1State">In progress</div>
+        </div>
 
+        <div class="t3-wrap">
+          <div class="status" id="status">CPU is <strong>X</strong> and goes first. You are <strong>O</strong>.</div>
+
+          <div class="board" id="board" aria-label="5 by 5 board with hidden outer ring">
+            <!-- 25 cells will be injected -->
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn primary" id="nextBtn" style="display:none">Next puzzle ▶</button>
+          </div>
+          <div class="hint">
+            The visible grid is 3×3. After the game ends in a <em>loss or tie</em>, something beyond the edges may help…
+          </div>
+        </div>
+      </article>
+
+      <!-- Puzzle 2 (placeholder) -->
+      <article class="puzzle-card panel" id="p2" aria-disabled="true">
+        <div class="puzzle-header">
+          <div class="puzzle-title">Puzzle 2 — Placeholder</div>
+          <div class="pill locked" id="p2State">Locked</div>
+        </div>
+        <p class="hint">This is a placeholder. It unlocks after Puzzle 1.</p>
+        <div class="actions">
+          <button class="btn" id="p2Complete" style="display:none">Mark puzzle 2 complete</button>
+          <button class="btn primary" id="toP3" style="display:none">Next ▶</button>
+        </div>
+      </article>
+
+      <!-- Puzzle 3 (placeholder) -->
+      <article class="puzzle-card panel" id="p3" aria-disabled="true">
+        <div class="puzzle-header">
+          <div class="puzzle-title">Puzzle 3 — Placeholder</div>
+          <div class="pill locked" id="p3State">Locked</div>
+        </div>
+        <p class="hint">Another placeholder. Reveals after Puzzle 2.</p>
+        <div class="actions">
+          <button class="btn" id="p3Complete" style="display:none">Mark puzzle 3 complete</button>
+          <button class="btn primary" id="finishBtn" style="display:none">Finish</button>
+        </div>
+      </article>
+    </section>
   </div>
 
-  <script src="script.js"></script>
+<script>
+(() => {
+  /* -------------------- Code Gate -------------------- */
+  const CODE = "JONES";
+  const gate = document.getElementById('gate');
+  const codeInputs = Array.from(document.querySelectorAll('#codeSlots input'));
+  const gateMsg = document.getElementById('gateMsg');
+  const puzzles = document.getElementById('puzzles');
+
+  codeInputs[0].focus();
+  codeInputs.forEach((inp, idx) => {
+    inp.addEventListener('input', () => {
+      inp.value = (inp.value || "").toUpperCase().slice(0,1);
+      if (inp.value && idx < codeInputs.length-1) codeInputs[idx+1].focus();
+      checkCode();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !inp.value && idx > 0) {
+        codeInputs[idx-1].focus();
+      }
+    });
+  });
+
+  function checkCode() {
+    const entered = codeInputs.map(i => i.value.toUpperCase()).join('');
+    if (entered.length < 5) {
+      gateMsg.textContent = '';
+      gateMsg.classList.remove('show');
+      return;
+    }
+    if (entered === CODE) {
+      gateMsg.textContent = 'Access granted.';
+      gateMsg.classList.add('show');
+      // Reveal puzzles after a short flourish
+      setTimeout(() => {
+        gate.style.display = 'none';
+        puzzles.classList.add('active');
+        puzzles.classList.add('show');
+        // Start puzzle 1
+        t3.resetGame();
+      }, 350);
+    } else {
+      gateMsg.textContent = 'Nope.';
+      gateMsg.classList.add('show');
+      // Wiggle and clear
+      setTimeout(() => {
+        codeInputs.forEach(i => i.value = '');
+        codeInputs[0].focus();
+        gateMsg.classList.remove('show');
+      }, 400);
+    }
+  }
+
+  /* -------------------- Puzzle Flow (placeholders) -------------------- */
+  const p1State = document.getElementById('p1State');
+  const p2State = document.getElementById('p2State');
+  const p3State = document.getElementById('p3State');
+  const p2 = document.getElementById('p2');
+  const p3 = document.getElementById('p3');
+  const p2Complete = document.getElementById('p2Complete');
+  const p3Complete = document.getElementById('p3Complete');
+  const toP3 = document.getElementById('toP3');
+  const finishBtn = document.getElementById('finishBtn');
+
+  function unlock(el, pill, buttons=[]) {
+    el.removeAttribute('aria-disabled');
+    pill.textContent = 'Unlocked';
+    pill.classList.remove('locked');
+    buttons.forEach(b => b.style.display = '');
+  }
+  function markSolved(pill) {
+    pill.textContent = 'Solved';
+    pill.classList.add('solved');
+  }
+
+  /* -------------------- Puzzle 1: Tic-tac-toe -------------------- */
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const resetBtn = document.getElementById('resetBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  const t3 = (() => {
+    // Internal state
+    let inner = Array(9).fill(''); // 3x3 visible board
+    let gameOver = false;
+    let secretEnabled = false;
+    const outerO = new Set(); // holds "r,c" strings for outer ring placements (only O can be placed)
+    const X = 'X', O = 'O';
+
+    // Build 5x5 UI
+    function buildBoard() {
+      boardEl.innerHTML = '';
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const isInner = r>=1 && r<=3 && c>=1 && c<=3;
+          const idx3 = (r-1)*3 + (c-1); // only valid if isInner
+          const cell = document.createElement('button');
+          cell.className = 'cell ' + (isInner ? 'visible' : 'outer');
+          cell.setAttribute('aria-label', isInner ? `Inner cell ${r},${c}` : `Outer cell ${r},${c}`);
+          if (!isInner) cell.tabIndex = -1; // not focusable until enabled
+          cell.addEventListener('click', () => handleClick(r, c, isInner, idx3, cell));
+          boardEl.appendChild(cell);
+        }
+      }
+      render();
+    }
+
+    function render() {
+      const cells = boardEl.children;
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const i = r*5+c;
+          const el = cells[i];
+          const isInner = r>=1 && r<=3 && c>=1 && c<=3;
+          el.innerHTML = '';
+          if (isInner) {
+            const idx3 = (r-1)*3 + (c-1);
+            const v = inner[idx3];
+            if (v) {
+              const span = document.createElement('span');
+              span.className = 'mark ' + (v===X ? 'x' : 'o');
+              span.textContent = v;
+              el.classList.add('filled');
+              el.appendChild(span);
+              el.disabled = true;
+            } else {
+              el.classList.remove('filled');
+              el.disabled = gameOver; // during game, only inner are interactable
+            }
+          } else {
+            // outer – always visually invisible, clickability toggled on the board container
+            el.disabled = false; // clicks filtered by pointer-events on container state
+          }
+        }
+      }
+      boardEl.classList.toggle('outer-enabled', secretEnabled);
+    }
+
+    function handleClick(r, c, isInner, idx3, cellEl) {
+      if (gameOver && !secretEnabled) return;
+      if (isInner) {
+        if (gameOver) return;
+        if (inner[idx3] !== '') return;
+
+        // Player move
+        inner[idx3] = O;
+        render();
+
+        // Check player win (shouldn't happen if CPU optimal, but keep for completeness)
+        const resAfterO = checkWinner3(inner);
+        if (resAfterO) return finish3(resAfterO);
+
+        // CPU move
+        const best = bestMove(inner, X); // minimax
+        if (best.index !== -1) {
+          inner[best.index] = X;
+        }
+        render();
+
+        const resAfterX = checkWinner3(inner);
+        if (resAfterX) return finish3(resAfterX);
+
+      } else {
+        // Outer ring click – only after game ended and ring is enabled
+        if (!secretEnabled) return;
+
+        const key = `${r},${c}`;
+        if (outerO.has(key)) return; // already placed here
+        outerO.add(key);
+
+        // Re-check secret victory: any 3-in-a-row of O in the 5x5 (contiguous, any straight line)
+        if (checkOThreeInRow5()) {
+          statusEl.className = 'status win';
+          statusEl.innerHTML = 'Secret path found: <strong>You win!</strong>';
+          markSolved(p1State);
+          nextBtn.style.display = '';
+        } else {
+          // keep silent; allow more attempts
+        }
+      }
+    }
+
+    function finish3(result) {
+      gameOver = true;
+      // Enable the secret ring after tie or CPU win
+      if (result === X) {
+        statusEl.className = 'status lose';
+        statusEl.innerHTML = 'Result: <strong>CPU (X) wins</strong>. Something beyond the board might change your fate…';
+      } else if (result === O) {
+        // This path is theoretically blocked by CPU optimal play, but guard anyway
+        statusEl.className = 'status win';
+        statusEl.innerHTML = '<strong>You win</strong> (unexpected).';
+      } else {
+        statusEl.className = 'status tie';
+        statusEl.textContent = 'Result: Tie. Perhaps… look beyond the edges?';
+      }
+      secretEnabled = (result === X || result === 'tie');
+      // make outer ring focusable only after enable (still no outline)
+      if (secretEnabled) {
+        Array.from(boardEl.children).forEach((el, i) => {
+          const r = Math.floor(i/5), c = i%5;
+          const isOuter = !(r>=1 && r<=3 && c>=1 && c<=3);
+          if (isOuter) el.tabIndex = 0;
+        });
+      }
+      render();
+    }
+
+    function resetGame() {
+      inner = Array(9).fill('');
+      gameOver = false;
+      secretEnabled = false;
+      outerO.clear();
+      statusEl.className = 'status';
+      statusEl.innerHTML = 'CPU is <strong>X</strong> and goes first. You are <strong>O</strong>.';
+      nextBtn.style.display = 'none';
+      p1State.textContent = 'In progress';
+      p1State.classList.remove('solved');
+
+      render();
+      // CPU goes first
+      const best = bestMove(inner, X);
+      if (best.index !== -1) inner[best.index] = X;
+      render();
+    }
+
+    // --- Game logic (3x3) ---
+    const LINES_3 = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    function checkWinner3(b) {
+      for (const [a,b1,c] of LINES_3) {
+        if (b[a] && b[a]===b[b1] && b[a]===b[c]) return b[a];
+      }
+      if (b.every(v => v)) return 'tie';
+      return null;
+    }
+
+    // Minimax ensuring optimal CPU play as X
+    function bestMove(board, player) {
+      // returns { index, score }
+      const avail = board.map((v,i)=>v?null:i).filter(i=>i!==null);
+      const winner = checkWinner3(board);
+      if (winner === X) return {score: 10};
+      if (winner === O) return {score: -10};
+      if (winner === 'tie') return {score: 0};
+      let best = { index: -1, score: player===X ? -Infinity : Infinity };
+
+      for (const i of avail) {
+        board[i] = player;
+        const result = bestMove(board, player===X?O:X);
+        board[i] = '';
+        const score = result.score + (player===X ? -1 : 1); // prefer quicker wins / delay losses
+        if (player===X) {
+          if (score > best.score) best = { index: i, score };
+        } else {
+          if (score < best.score) best = { index: i, score };
+        }
+      }
+      return best;
+    }
+
+    // Build a 5x5 boolean grid of O's including inner + outer
+    function buildOGrid5() {
+      const grid = Array.from({length:5},()=>Array(5).fill(false));
+      // inner O's
+      for (let r=1; r<=3; r++) {
+        for (let c=1; c<=3; c++) {
+          const idx3 = (r-1)*3 + (c-1);
+          if (inner[idx3]===O) grid[r][c] = true;
+        }
+      }
+      // outer O's placed
+      outerO.forEach(key => {
+        const [r,c] = key.split(',').map(Number);
+        grid[r][c] = true;
+      });
+      return grid;
+    }
+
+    // Check any straight contiguous 3 of O in 5x5 (h, v, diag, anti-diag)
+    function checkOThreeInRow5() {
+      const g = buildOGrid5();
+      const dirs = [
+        [0,1], [1,0], [1,1], [1,-1]
+      ];
+      for (let r=0; r<5; r++) {
+        for (let c=0; c<5; c++) {
+          if (!g[r][c]) continue;
+          for (const [dr,dc] of dirs) {
+            const r2 = r+dr, c2 = c+dc;
+            const r3 = r+2*dr, c3 = c+2*dc;
+            if (r3<0 || r3>=5 || c3<0 || c3>=5) continue;
+            if (g[r2]?.[c2] && g[r3]?.[c3]) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    return { resetGame };
+  })();
+
+  resetBtn.addEventListener('click', t3.resetGame);
+  nextBtn.addEventListener('click', () => {
+    markSolved(p1State);
+    unlock(p2, p2State, [p2Complete, toP3]);
+    // Smooth scroll to puzzle 2
+    document.getElementById('p2').scrollIntoView({behavior: 'smooth', block: 'start'});
+  });
+
+  // Placeholder progression
+  p2Complete?.addEventListener('click', () => {
+    markSolved(p2State);
+    toP3.style.display = 'none';
+    unlock(p3, p3State, [p3Complete, finishBtn]);
+    document.getElementById('p3').scrollIntoView({behavior: 'smooth', block: 'start'});
+  });
+  p3Complete?.addEventListener('click', () => {
+    markSolved(p3State);
+    finishBtn.style.display = '';
+  });
+  finishBtn?.addEventListener('click', () => {
+    alert('All placeholder puzzles completed. 🎉');
+  });
+
+  // Build the 5x5 board structure once DOM is ready
+  // (We build immediately; it will become visible after the code gate)
+  (function initBoardStructure(){
+    // Create cells now so layout is ready when shown
+    const temp = document.createElement('div');
+    temp.id = 'temp';
+    // rely on t3.resetGame() to build grid
+    // but we need to ensure board has cells before reset; so rebuild function call:
+    // t3.resetGame() builds after it re-renders; that's fine as it calls render() -> creates content.
+  })();
+})();
+</script>
 </body>
 </html>
