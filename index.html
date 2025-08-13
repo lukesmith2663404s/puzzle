@@ -54,6 +54,12 @@
     font-size: 1.2em;
     min-height: 1.2em;
   }
+  #nextBtn {
+    display: none;
+  }
+  #nextBtn.visible {
+    display: inline-block;
+  }
 </style>
 </head>
 <body>
@@ -67,7 +73,10 @@
 <section id="puzzle1">
   <div id="result"></div>
   <div class="board" id="board"></div>
-  <button id="reset">Reset</button>
+  <div>
+    <button id="reset">Reset</button>
+    <button id="nextBtn">Next</button>
+  </div>
 </section>
 
 <section id="puzzle2">
@@ -106,6 +115,7 @@ let outerO = new Set();
 let cpuFirstMove = true;
 const X = 'X', O = 'O';
 const resultEl = document.getElementById('result');
+const nextBtn = document.getElementById('nextBtn');
 
 function ensurePuzzle1Init() {
   if (!built) {
@@ -175,7 +185,6 @@ function handleClick(r,c,isInner,idx3) {
     outerO.add(key);
     if (checkOThreeInRow5()) {
       finish3(O);
-      showSection('puzzle2');
     }
   }
 }
@@ -184,6 +193,9 @@ function finish3(res) {
   gameOver = true;
   outerEnabled = (res === X || res === 'tie' || res === O);
   resultEl.textContent = res === 'tie' ? 'Tie' : (res === X ? 'Lose' : 'Win');
+  if (res === O) {
+    nextBtn.classList.add('visible');
+  }
   render();
 }
 
@@ -194,11 +206,15 @@ function resetGame() {
   outerO.clear();
   cpuFirstMove = true;
   resultEl.textContent = '';
+  nextBtn.classList.remove('visible');
   cpuMove(); // CPU goes first at start
   render();
 }
 
 document.getElementById('reset').onclick = resetGame;
+nextBtn.onclick = () => {
+  showSection('puzzle2');
+};
 
 /* Minimax */
 const LINES_3 = [
