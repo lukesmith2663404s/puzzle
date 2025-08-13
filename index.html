@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Puzzle</title>
 <style>
+  /* unchanged theme + code entry */
   body {
     background: #000;
     color: #fff;
@@ -22,6 +23,8 @@
     background: #111; border: none; color: #fff;
     text-transform: uppercase;
   }
+
+  /* puzzle grid (tweaked for clear visibility while staying dark) */
   .board {
     display: grid;
     grid-template-columns: repeat(5, 80px);
@@ -33,14 +36,16 @@
     font-size: 2em; font-weight: bold;
     background: transparent; color: #fff;
     border: none; cursor: pointer;
+    user-select: none;
   }
   .visible {
     background: #111;
+    outline: 1px solid #222;          /* subtle grid lines so it’s clearly visible on black */
   }
   .filled { cursor: default; }
   .outer {
-    background: #000;
-    pointer-events: none;
+    background: #000;                 /* identical to page background (invisible) */
+    pointer-events: none;             /* disabled until end */
   }
   .outerEnabled .outer { pointer-events: auto; }
   button {
@@ -67,9 +72,9 @@
 </section>
 
 <script>
+/* --- Code gate (unchanged) --- */
 const CODE = "JONES";
 const codeInputs = document.querySelectorAll('#code input');
-let codeIndex = 0;
 codeInputs.forEach((input, idx) => {
   input.addEventListener('input', () => {
     input.value = input.value.toUpperCase().slice(0,1);
@@ -81,19 +86,29 @@ function checkCode() {
   const val = Array.from(codeInputs).map(i=>i.value).join('');
   if (val === CODE) showSection('puzzle1');
 }
-
 function showSection(id) {
   document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (id === 'puzzle1') ensurePuzzle1Init();  // build/render when shown
 }
 
-/* --- Puzzle 1: Noughts and crosses --- */
+/* --- Puzzle 1: Noughts & Crosses --- */
 const boardEl = document.getElementById('board');
-let inner = Array(9).fill('');
+let built = false;
+
+let inner = Array(9).fill('');   // visible 3×3
 let gameOver = false;
 let outerEnabled = false;
 let outerO = new Set();
 const X = 'X', O = 'O';
+
+function ensurePuzzle1Init() {
+  if (!built) {
+    buildBoard();
+    built = true;
+  }
+  resetGame();                   // start fresh each time it appears
+}
 
 function buildBoard() {
   boardEl.innerHTML = '';
@@ -109,11 +124,12 @@ function buildBoard() {
   }
   render();
 }
+
 function render() {
   const cells = boardEl.children;
   for (let r = 0; r < 5; r++) {
     for (let c = 0; c < 5; c++) {
-      const idx = r*5+c;
+      const idx = r*5 + c;
       const cell = cells[idx];
       const isInner = r>=1 && r<=3 && c>=1 && c<=3;
       cell.textContent = '';
@@ -126,34 +142,59 @@ function render() {
         } else {
           cell.classList.remove('filled');
         }
-        cell.disabled = gameOver || v;
+        cell.disabled = gameOver || !!v;
       }
     }
   }
   boardEl.classList.toggle('outerEnabled', outerEnabled);
 }
+
 function handleClick(r,c,isInner,idx3) {
   if (isInner && !gameOver) {
     if (inner[idx3]) return;
     inner[idx3] = O;
     render();
-    if (checkWinner3(inner)) return finish3(checkWinner3(inner));
+
+    const res1 = checkWinner3(inner);
+    if (res1) return finish3(res1);
+
     cpuMove();
     render();
-    if (checkWinner3(inner)) return finish3(checkWinner3(inner));
+
+    const res2 = checkWinner3(inner);
+    if (res2) return finish3(res2);
+
   } else if (!isInner && outerEnabled) {
     const key = `${r},${c}`;
     if (outerO.has(key)) return;
     outerO.add(key);
     if (checkOThreeInRow5()) {
-      showSection('puzzle2');
+      showSection('puzzle2');    // advance when secret line of O’s is formed
     }
   }
 }
-function cpuMove() {
-  const best = bestMove(inner, X);
-  if (best.index !== -1) inner[best.index] = X;
+
+function finish3(res) {
+  gameOver = true;
+  outerEnabled = (res === X || res === 'tie');  // unlock hidden ring only on loss or tie
+  render();
 }
+
+/* Force CPU to open in the centre, then play optimally thereafter */
+function resetGame() {
+  inner = Array(9).fill('');
+  gameOver = false;
+  outerEnabled = false;
+  outerO.clear();
+
+  // CPU first move always centre (index 4)
+  inner[4] = X;
+  render();
+}
+
+document.getElementById('reset').onclick = resetGame;
+
+/* Minimax (optimal play after opening) */
 const LINES_3 = [
   [0,1,2],[3,4,5],[6,7,8],
   [0,3,6],[1,4,7],[2,5,8],
@@ -164,22 +205,24 @@ function checkWinner3(b) {
   if (b.every(v=>v)) return 'tie';
   return null;
 }
-function finish3(res) {
-  gameOver = true;
-  outerEnabled = (res === X || res === 'tie');
+function cpuMove() {
+  const best = bestMove(inner, X);
+  if (best.index !== -1) inner[best.index] = X;
 }
 function bestMove(board, player) {
-  const avail = board.map((v,i)=>v?null:i).filter(i=>i!==null);
   const winner = checkWinner3(board);
-  if (winner === X) return {score: 10};
-  if (winner === O) return {score: -10};
-  if (winner === 'tie') return {score: 0};
+  if (winner === X) return { score: 10, index: -1 };
+  if (winner === O) return { score: -10, index: -1 };
+  if (winner === 'tie') return { score: 0, index: -1 };
+
+  const avail = board.map((v,i)=>v?null:i).filter(i=>i!==null);
   let best = { index: -1, score: player===X ? -Infinity : Infinity };
+
   for (const i of avail) {
     board[i] = player;
     const result = bestMove(board, player===X?O:X);
     board[i] = '';
-    const score = result.score + (player===X ? -1 : 1);
+    const score = result.score + (player===X ? -1 : 1); // prefer quick wins / delay losses
     if (player===X) {
       if (score > best.score) best = { index: i, score };
     } else {
@@ -188,6 +231,8 @@ function bestMove(board, player) {
   }
   return best;
 }
+
+/* Secret outer-ring O detection (any straight 3-in-a-row in 5×5) */
 function buildOGrid5() {
   const g = Array.from({length:5},()=>Array(5).fill(false));
   for (let r=1; r<=3; r++) for (let c=1; c<=3; c++) {
@@ -203,24 +248,16 @@ function buildOGrid5() {
 function checkOThreeInRow5() {
   const g = buildOGrid5();
   const dirs = [[0,1],[1,0],[1,1],[1,-1]];
-  for (let r=0;r<5;r++) for (let c=0;c<5;c++) if (g[r][c])
+  for (let r=0;r<5;r++) for (let c=0;c<5;c++) if (g[r][c]) {
     for (const [dr,dc] of dirs) {
       const r2=r+dr,c2=c+dc,r3=r+2*dr,c3=c+2*dc;
       if (g[r2]?.[c2] && g[r3]?.[c3]) return true;
     }
+  }
   return false;
 }
-function resetGame() {
-  inner = Array(9).fill('');
-  gameOver = false;
-  outerEnabled = false;
-  outerO.clear();
-  cpuMove();
-  render();
-}
-document.getElementById('reset').onclick = resetGame;
-buildBoard();
-resetGame();
+
+/* Initialize only the code gate visible; puzzle builds when shown */
 </script>
 
 </body>
