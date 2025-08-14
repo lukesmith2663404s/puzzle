@@ -38,28 +38,20 @@
   }
   .visible {
     background: #111;
-    outline: 1px solid #222;
+    outline: 1px solid #222; /* subtle grid lines */
   }
   .filled { cursor: default; }
   .outer {
-    background: #000;
-    pointer-events: none;
+    background: #000;           /* exactly page bg = invisible */
+    pointer-events: none;       /* disabled until game end */
   }
   .outerEnabled .outer { pointer-events: auto; }
   button {
     padding: 10px 20px; background: #222; border: none; color: #fff;
     cursor: pointer; font-size: 1em;
   }
-  #result {
-    font-size: 1.2em;
-    min-height: 1.2em;
-  }
-  #nextBtn {
-    display: none;
-  }
-  #nextBtn.visible {
-    display: inline-block;
-  }
+  #result { font-size: 1.2em; min-height: 1.2em; }
+  #nextBtn { display: none; }
 </style>
 </head>
 <body>
@@ -84,45 +76,42 @@
 </section>
 
 <script>
-/* --- Code gate --- */
+/* --- Code gate (unchanged) --- */
 const CODE = "JONES";
 const codeInputs = document.querySelectorAll('#code input');
 codeInputs.forEach((input, idx) => {
   input.addEventListener('input', () => {
     input.value = input.value.toUpperCase().slice(0,1);
     if (idx < codeInputs.length-1 && input.value) codeInputs[idx+1].focus();
-    checkCode();
+    const val = Array.from(codeInputs).map(i=>i.value).join('');
+    if (val === CODE) showSection('puzzle1');
   });
 });
-function checkCode() {
-  const val = Array.from(codeInputs).map(i=>i.value).join('');
-  if (val === CODE) showSection('puzzle1');
-}
 function showSection(id) {
   document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if (id === 'puzzle1') ensurePuzzle1Init();
 }
 
-/* --- Puzzle 1: Noughts & Crosses --- */
+/* --- Puzzle 1 --- */
 const boardEl = document.getElementById('board');
+const resultEl = document.getElementById('result');
+const nextBtn = document.getElementById('nextBtn');
 let built = false;
 
-let inner = Array(9).fill('');
+let inner = Array(9).fill('');   // visible 3×3
 let gameOver = false;
 let outerEnabled = false;
 let outerO = new Set();
 let cpuFirstMove = true;
 const X = 'X', O = 'O';
-const resultEl = document.getElementById('result');
-const nextBtn = document.getElementById('nextBtn');
 
 function ensurePuzzle1Init() {
   if (!built) {
     buildBoard();
     built = true;
   }
-  resetGame();
+  resetGame(); // fresh start each time
 }
 
 function buildBoard() {
@@ -184,18 +173,18 @@ function handleClick(r,c,isInner,idx3) {
     if (outerO.has(key)) return;
     outerO.add(key);
     if (checkOThreeInRow5()) {
-      finish3(O);
+      finish3(O);                 // mark as Win
     }
   }
 }
 
 function finish3(res) {
   gameOver = true;
-  outerEnabled = (res === X || res === 'tie' || res === O);
+  outerEnabled = (res === X || res === 'tie' || res === O); // ring stays enabled after end
+  // Show result text
   resultEl.textContent = res === 'tie' ? 'Tie' : (res === X ? 'Lose' : 'Win');
-  if (res === O) {
-    nextBtn.classList.add('visible');
-  }
+  // Only reveal Next on Win; never auto-navigate
+  nextBtn.style.display = (res === O) ? 'inline-block' : 'none';
   render();
 }
 
@@ -206,17 +195,15 @@ function resetGame() {
   outerO.clear();
   cpuFirstMove = true;
   resultEl.textContent = '';
-  nextBtn.classList.remove('visible');
-  cpuMove(); // CPU goes first at start
+  nextBtn.style.display = 'none';
+  cpuMove(); // CPU first: centre
   render();
 }
 
 document.getElementById('reset').onclick = resetGame;
-nextBtn.onclick = () => {
-  showSection('puzzle2');
-};
+nextBtn.onclick = () => { showSection('puzzle2'); };
 
-/* Minimax */
+/* Minimax for optimal CPU after opening */
 const LINES_3 = [
   [0,1,2],[3,4,5],[6,7,8],
   [0,3,6],[1,4,7],[2,5,8],
@@ -230,7 +217,7 @@ function checkWinner3(b) {
 function cpuMove() {
   if (cpuFirstMove) {
     cpuFirstMove = false;
-    inner[4] = X; // centre
+    inner[4] = X;  // centre opening
     return;
   }
   const best = bestMove(inner, X);
@@ -249,7 +236,7 @@ function bestMove(board, player) {
     board[i] = player;
     const result = bestMove(board, player===X?O:X);
     board[i] = '';
-    const score = result.score + (player===X ? -1 : 1);
+    const score = result.score + (player===X ? -1 : 1); // prefer quick wins / delay losses
     if (player===X) {
       if (score > best.score) best = { index: i, score };
     } else {
@@ -259,7 +246,7 @@ function bestMove(board, player) {
   return best;
 }
 
-/* Outer ring 3-in-a-row detection */
+/* Outer-ring three-in-a-row check for O in full 5×5 */
 function buildOGrid5() {
   const g = Array.from({length:5},()=>Array(5).fill(false));
   for (let r=1; r<=3; r++) for (let c=1; c<=3; c++) {
