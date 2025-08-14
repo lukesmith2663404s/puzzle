@@ -38,14 +38,21 @@
   }
   .visible {
     background: #111;
-    outline: 1px solid #222; /* subtle grid lines */
+    outline: 1px solid #222;
   }
   .filled { cursor: default; }
   .outer {
-    background: #000;           /* exactly page bg = invisible */
-    pointer-events: none;       /* disabled until game end */
+    background: #000;
+    pointer-events: none;
   }
   .outerEnabled .outer { pointer-events: auto; }
+
+  /* NEW: make placed outer O tiles visible */
+  .outer-played {
+    background: #111 !important;
+    outline: 1px solid #222 !important;
+  }
+
   button {
     padding: 10px 20px; background: #222; border: none; color: #fff;
     cursor: pointer; font-size: 1em;
@@ -76,7 +83,7 @@
 </section>
 
 <script>
-/* --- Code gate (unchanged) --- */
+/* --- Code gate --- */
 const CODE = "JONES";
 const codeInputs = document.querySelectorAll('#code input');
 codeInputs.forEach((input, idx) => {
@@ -111,7 +118,7 @@ function ensurePuzzle1Init() {
     buildBoard();
     built = true;
   }
-  resetGame(); // fresh start each time
+  resetGame();
 }
 
 function buildBoard() {
@@ -148,15 +155,13 @@ function render() {
         }
         cell.disabled = gameOver || !!v;
       } else {
-        // Outer ring
+        // Render outer O tiles when placed
         const key = `${r},${c}`;
         if (outerO.has(key)) {
           cell.textContent = O;
-          cell.style.background = '#111'; // match inner cells
-          cell.style.outline = '1px solid #222';
+          cell.classList.add('outer-played');
         } else {
-          cell.style.background = '#000'; // invisible until played
-          cell.style.outline = 'none';
+          cell.classList.remove('outer-played');
         }
       }
     }
@@ -183,18 +188,17 @@ function handleClick(r,c,isInner,idx3) {
     const key = `${r},${c}`;
     if (outerO.has(key)) return;
     outerO.add(key);
+    render(); // <-- show the placed outer O immediately
     if (checkOThreeInRow5()) {
-      finish3(O);                 // mark as Win
+      finish3(O); // mark as Win (Next button appears; no auto navigation)
     }
   }
 }
 
 function finish3(res) {
   gameOver = true;
-  outerEnabled = (res === X || res === 'tie' || res === O); // ring stays enabled after end
-  // Show result text
+  outerEnabled = (res === X || res === 'tie' || res === O);
   resultEl.textContent = res === 'tie' ? 'Tie' : (res === X ? 'Lose' : 'Win');
-  // Only reveal Next on Win; never auto-navigate
   nextBtn.style.display = (res === O) ? 'inline-block' : 'none';
   render();
 }
