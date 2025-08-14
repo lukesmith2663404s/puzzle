@@ -34,7 +34,7 @@
   /* Crossword styles (isolated to puzzle2) */
   .crossword {
     border-collapse: collapse;
-    margin: 20px auto;
+    margin: 40px auto 10px auto; /* More top space, small bottom space */
   }
   .crossword td {
     position: relative;
@@ -96,6 +96,7 @@
 <!-- Puzzle 2 -->
 <div id="puzzle2" class="puzzle-section">
   <div id="crossword-container"></div>
+  <button id="next2" style="display:none;" onclick="showSection('puzzle3')">Next</button>
   <div id="crossword-clues">
     <h3>ACROSS</h3>
     <p>1A. 2F Lecturers</p>
@@ -111,7 +112,12 @@
     <p>7D. You might well say this in satisfaction when solving this crossword</p>
     <p>9D. So you want to know 9D? Well I've heard ( ln(S^2+2)^2 + ln(T^2+e)^2 + exp(U^2) + arctan(V)^2 + (abs(W)+1)^3 + sin(X)^2 + (R^2+K^2+D^2+1)^5 + 1 ) * (-1 - ((RK/D)^(1/2) - 4)) = 0. And writing the parameters in the solutions to these things alphabetically is so last year.</p>
   </div>
-  <button id="next2" style="display:none;" onclick="showSection('puzzle3')">Next</button>
+</div>
+
+<!-- Puzzle 3 Placeholder -->
+<div id="puzzle3" class="puzzle-section">
+  <h1>Puzzle 3</h1>
+  <p>This is a placeholder for Puzzle 3.</p>
 </div>
 
 <script>
@@ -199,9 +205,6 @@ function makeMove(index, player) {
     document.getElementById('result').textContent = 'Tie!';
     gameActive = false;
     return;
-  }
-  if (player === 'X' && gameActive) {
-    // Wait for player move
   }
 }
 
