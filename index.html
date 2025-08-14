@@ -147,6 +147,17 @@ function render() {
           cell.classList.remove('filled');
         }
         cell.disabled = gameOver || !!v;
+      } else {
+        // Outer ring
+        const key = `${r},${c}`;
+        if (outerO.has(key)) {
+          cell.textContent = O;
+          cell.style.background = '#111'; // match inner cells
+          cell.style.outline = '1px solid #222';
+        } else {
+          cell.style.background = '#000'; // invisible until played
+          cell.style.outline = 'none';
+        }
       }
     }
   }
