@@ -12,67 +12,35 @@
     margin: 0;
     padding: 0;
   }
-  h1, h3, p { color: white; }
-
-  .puzzle-section {
-    display: none;
-    margin-top: 20px;
+  .puzzle-section { display: none; margin-top: 20px; }
+  .code-input { width: 40px; height: 40px; text-align: center; font-size: 24px; margin: 5px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 100px); grid-gap: 5px; margin: auto; }
+  .cell {
+    width: 100px; height: 100px; background-color: #1e1e1e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; cursor: pointer; user-select: none;
   }
-
-  /* Code entry */
-  .code-input {
-    width: 50px;
-    height: 50px;
-    text-align: center;
-    font-size: 28px;
-    margin: 5px;
-    background-color: #1e1e1e;
-    color: white;
-    border: 2px solid #333;
-    text-transform: uppercase;
-  }
-
-  /* Puzzle 1: outer ring / grid */
-  .outer-ring {
-    display: grid;
-    grid-template-columns: repeat(5, 60px);
-    grid-gap: 2px;
-    margin: 20px auto;
-  }
+  .outer-ring { display: grid; grid-template-columns: repeat(5, 60px); grid-gap: 2px; margin: auto; }
   .outer-cell {
-    width: 60px;
-    height: 60px;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    cursor: pointer;
-    user-select: none;
+    width: 60px; height: 60px; background-color: transparent;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; cursor: pointer; user-select: none;
     border: none;
-    color: white;
   }
-  .outer-cell.cell {
-    background-color: #1e1e1e;
-  }
-  .outer-cell.visibleO {
-    background-color: #1e1e1e;
-    color: white;
-  }
+  .outer-cell.visibleO { background-color: #1e1e1e; color: white; }
+  button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+  #result { font-size: 24px; margin-top: 20px; }
 
-  /* Puzzle 2: crossword */
-  #crossword-container {
-    margin-top: 40px; /* extra black space above */
-  }
+  /* Crossword styles (isolated to puzzle2) */
   .crossword {
     border-collapse: collapse;
-    margin: auto;
+    margin: 20px auto;
   }
   .crossword td {
     position: relative;
     width: 40px;
     height: 40px;
-    border: 1px solid #888;
+    border: 1px solid #333;
   }
   .crossword td.black {
     background: #000;
@@ -97,19 +65,8 @@
   #crossword-clues {
     text-align: left;
     max-width: 600px;
-    margin: 20px auto;
+    margin: auto;
     color: white;
-  }
-
-  /* Buttons */
-  button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background: #333;
-    color: white;
-    border: none;
   }
 </style>
 </head>
@@ -139,42 +96,37 @@
 <!-- Puzzle 2 -->
 <div id="puzzle2" class="puzzle-section">
   <div id="crossword-container"></div>
-  <button id="next2" style="display:none;" onclick="showSection('puzzle3')">Next</button>
   <div id="crossword-clues">
     <h3>ACROSS</h3>
     <p>1A. 2F Lecturers</p>
-    <p>5A. With 8A, Monty Hall variant answer</p>
+    <p>5A. With 8A, despite the fact you doubted me on this at first 4 years ago, the chance of choosing the door with the car behind it, if you choose to switch doors from your initial choice, where Monty doesn't know where the car is and resets the game if he reveals the car.</p>
     <p>6A. What e = 2?</p>
     <p>8A. See 5A</p>
-    <p>10A. Clothing item same length as forearm</p>
+    <p>10A. Donned on body parts the same length as your forearm. Can be checked during maths lectures, apparently.</p>
     <h3>DOWN</h3>
-    <p>1D. Fastened bands, strips of land, vocal technique</p>
+    <p>1D. Fastened bands, strips of land, technique of loud vocalist.</p>
     <p>2D. George and Ruthie's specialty</p>
     <p>3D. The beginning of knowledge...</p>
     <p>4D. What does a sender do?</p>
-    <p>7D. Satisfied reaction to solving</p>
-    <p>9D. Complex math clue</p>
+    <p>7D. You might well say this in satisfaction when solving this crossword</p>
+    <p>9D. So you want to know 9D? Well I've heard ( ln(S^2+2)^2 + ln(T^2+e)^2 + exp(U^2) + arctan(V)^2 + (abs(W)+1)^3 + sin(X)^2 + (R^2+K^2+D^2+1)^5 + 1 ) * (-1 - ((RK/D)^(1/2) - 4)) = 0. And writing the parameters in the solutions to these things alphabetically is so last year.</p>
   </div>
-</div>
-
-<!-- Puzzle 3 -->
-<div id="puzzle3" class="puzzle-section">
-  <h1>Puzzle 3 Coming Soon</h1>
+  <button id="next2" style="display:none;" onclick="showSection('puzzle3')">Next</button>
 </div>
 
 <script>
 function showSection(id) {
   document.querySelectorAll('.puzzle-section').forEach(sec => sec.style.display = 'none');
   document.getElementById(id).style.display = 'block';
-  if (id === 'puzzle1') startPuzzle1();
-  if (id === 'puzzle2') buildCrossword();
+  if (id === 'puzzle2') {
+    buildCrossword();
+  }
 }
 
-/* Code entry */
+// Code entry
 const codeInputs = document.querySelectorAll('.code-input');
 codeInputs.forEach((input, index) => {
   input.addEventListener('input', () => {
-    input.value = input.value.toUpperCase();
     if (input.value.length === 1 && index < codeInputs.length - 1) {
       codeInputs[index + 1].focus();
     }
@@ -183,61 +135,89 @@ codeInputs.forEach((input, index) => {
 });
 function checkCode() {
   const code = Array.from(codeInputs).map(inp => inp.value.toUpperCase()).join('');
-  if (code === 'JONES') showSection('puzzle1');
+  if (code === 'JONES') {
+    showSection('puzzle1');
+    startPuzzle1();
+  }
 }
 
-/* Puzzle 1 */
+// Puzzle 1
+let grid = Array(9).fill(null);
 let outerRing = [];
 let gameActive = true;
+
 function startPuzzle1() {
   const outerRingContainer = document.getElementById('outer-ring');
   outerRingContainer.innerHTML = '';
-  outerRing = Array(25).fill(null);
+  grid.fill(null);
   gameActive = true;
+  outerRing = Array(25).fill(null);
 
+  // Render 5x5
   for (let i = 0; i < 25; i++) {
     const cell = document.createElement('div');
     cell.classList.add('outer-cell');
-    if ((i >= 6 && i <= 8) || (i >= 11 && i <= 13) || (i >= 16 && i <= 18)) {
+    if (i >= 6 && i <= 8 || i >= 11 && i <= 13 || i >= 16 && i <= 18) {
       cell.classList.add('cell');
+      cell.style.backgroundColor = '#1e1e1e';
       cell.addEventListener('click', () => handlePlayerMove(i));
+    } else {
+      cell.addEventListener('click', () => handleOuterClick(i));
     }
     outerRingContainer.appendChild(cell);
   }
-  cpuMove();
+  cpuMove(); // CPU starts
 }
 
 function cpuMove() {
   if (!gameActive) return;
-  if ([6,7,8,11,12,13,16,17,18].every(i => outerRing[i] === null)) {
-    makeMove(12, 'X');
+  // Always center first move if empty
+  if (grid.every(cell => cell === null)) {
+    makeMove(12, 'X'); // center of 5x5 grid
     return;
   }
-  const available = [6,7,8,11,12,13,16,17,18].filter(i => outerRing[i] === null);
-  if (available.length) makeMove(available[0], 'X');
+  const move = findBestMove(grid);
+  if (move !== null) makeMove(move, 'X');
 }
 
 function makeMove(index, player) {
   const cell = document.getElementById('outer-ring').children[index];
   cell.textContent = player;
-  if (player === 'O') cell.classList.add('visibleO');
+  if (player === 'O') {
+    cell.classList.add('visibleO');
+  }
   outerRing[index] = player;
   if (isWin(player)) {
     document.getElementById('result').textContent = player === 'O' ? 'You Win!' : 'You Lose!';
     gameActive = false;
-    if (player === 'O') document.getElementById('next1').style.display = 'block';
+    if (player === 'O') {
+      document.getElementById('next1').style.display = 'block';
+    }
     return;
   }
   if (isTie()) {
     document.getElementById('result').textContent = 'Tie!';
     gameActive = false;
+    return;
+  }
+  if (player === 'X' && gameActive) {
+    // Wait for player move
   }
 }
 
 function handlePlayerMove(index) {
-  if (!gameActive || outerRing[index] !== null) return;
+  if (!gameActive) return;
+  const cell = document.getElementById('outer-ring').children[index];
+  if (outerRing[index] !== null) return;
   makeMove(index, 'O');
   if (gameActive) cpuMove();
+}
+
+function handleOuterClick(index) {
+  if (gameActive) return;
+  const cell = document.getElementById('outer-ring').children[index];
+  if (outerRing[index] !== null) return;
+  makeMove(index, 'O');
 }
 
 function isWin(player) {
@@ -250,12 +230,17 @@ function isWin(player) {
 }
 
 function isTie() {
-  return [6,7,8,11,12,13,16,17,18].every(i => outerRing[i] !== null);
+  return outerRing.filter((_, i) => [6,7,8,11,12,13,16,17,18].includes(i)).every(cell => cell !== null);
+}
+
+function findBestMove(board) {
+  const available = [6,7,8,11,12,13,16,17,18].filter(i => outerRing[i] === null);
+  return available.length ? available[0] : null;
 }
 
 document.getElementById('reset-btn').addEventListener('click', startPuzzle1);
 
-/* Puzzle 2: crossword */
+// Puzzle 2
 function buildCrossword() {
   const container = document.getElementById('crossword-container');
   container.innerHTML = '';
@@ -271,8 +256,10 @@ function buildCrossword() {
     '1,2':5,'2,0':6,'2,1':7,'3,0':8,
     '3,3':9,'4,0':10
   };
+  
   const table = document.createElement('table');
   table.classList.add('crossword');
+  
   for (let r=0;r<5;r++) {
     const tr = document.createElement('tr');
     for (let c=0;c<5;c++) {
@@ -313,10 +300,15 @@ function checkCrossword() {
   document.querySelectorAll('.cw-cell').forEach(cell => {
     const r = parseInt(cell.dataset.row);
     const c = parseInt(cell.dataset.col);
-    if (cell.value.toUpperCase() !== target[r][c]) correct = false;
+    if (cell.value.toUpperCase() !== target[r][c]) {
+      correct = false;
+    }
   });
-  if (correct) document.getElementById('next2').style.display = 'block';
+  if (correct) {
+    document.getElementById('next2').style.display = 'block';
+  }
 }
 </script>
+
 </body>
 </html>
