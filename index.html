@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Puzzle Challenge</title>
 <style>
   /* Base */
@@ -100,6 +100,50 @@
     margin: 8px auto 24px auto;
     color: white;
   }
+
+  /* Puzzle 3 (Clock) - keep scoped to puzzle3 so other styling unaffected */
+  #puzzle3 .clock-wrapper {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  #puzzle3 .clock {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: inherit;
+    color: white;
+    font-size: 48px;
+    letter-spacing: 2px;
+  }
+  #puzzle3 .half {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+  }
+  #puzzle3 .half .value {
+    background: #1e1e1e;
+    padding: 8px 16px;
+    border-radius: 6px;
+    min-width: 60px;
+    text-align: center;
+    font-size: 40px;
+    color: white;
+    box-shadow: none;
+  }
+  #puzzle3 .prime-btn {
+    margin-top: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #puzzle3 #next3 {
+    display: none;
+    margin-top: 8px;
+  }
 </style>
 </head>
 <body>
@@ -149,10 +193,33 @@
   </div>
 </div>
 
-<!-- Puzzle 3 Placeholder -->
+<!-- Puzzle 3 -->
 <div id="puzzle3" class="puzzle-section">
   <h1>Puzzle 3</h1>
-  <p>This is a placeholder for Puzzle 3.</p>
+
+  <div class="clock-wrapper" aria-live="polite">
+    <div class="clock" id="clock">
+      <div class="half" id="hour-half">
+        <div class="value" id="hour-value">00</div>
+        <button class="prime-btn" id="primeHourBtn">Prime Time?</button>
+      </div>
+
+      <div style="font-size:40px;color:white;opacity:0.9;">:</div>
+
+      <div class="half" id="minute-half">
+        <div class="value" id="minute-value">00</div>
+        <button class="prime-btn" id="primeMinuteBtn">Prime Time?</button>
+      </div>
+    </div>
+
+    <button id="next3" onclick="showSection('puzzle4')">Next</button>
+  </div>
+</div>
+
+<!-- Puzzle 4 placeholder -->
+<div id="puzzle4" class="puzzle-section">
+  <h1>Puzzle 4 (placeholder)</h1>
+  <p>This is a placeholder for Puzzle 4.</p>
 </div>
 
 <script>
@@ -161,8 +228,10 @@ function showSection(id) {
   document.querySelectorAll('.puzzle-section').forEach(sec => sec.style.display = 'none');
   const el = document.getElementById(id);
   el.style.display = 'block';
+  // start/init hooks
   if (id === 'puzzle1') startPuzzle1();
   if (id === 'puzzle2') buildCrossword();
+  if (id === 'puzzle3') initPuzzle3();
 }
 
 /* Code entry */
@@ -183,7 +252,7 @@ function checkCode() {
   }
 }
 
-/* --- Puzzle 1 logic --- */
+/* --- Puzzle 1 logic (unchanged) --- */
 let outerRing = [];
 let gameActive = true;
 
@@ -194,19 +263,14 @@ const winsOuter = [
   [6,11,16],[7,12,17],[8,13,18],
   [6,12,18],[8,12,16]
 ];
-
-// Extended triplets that include one outer cell + two aligned inner cells.
-// These are the 5×5 “extensions” of the 3×3 win lines.
+// extendedTriplets copied from previous working config
 const extendedTriplets = [
-  // Horizontals (left-extensions and right-extensions for each inner row)
   [5,6,7], [7,8,9],
   [10,11,12], [12,13,14],
   [15,16,17], [17,18,19],
-  // Verticals (top-extensions and bottom-extensions for each inner col)
   [1,6,11], [11,16,21],
   [2,7,12], [12,17,22],
   [3,8,13], [13,18,23],
-  // Diagonals (both ends of both diagonals)
   [0,6,12], [12,18,24],
   [4,8,12], [12,16,20]
 ];
@@ -219,12 +283,12 @@ function startPuzzle1() {
   document.getElementById('result').textContent = '';
   document.getElementById('next1').style.display = 'none';
 
-  // Build 5x5, attach handlers to ALL cells.
+  // Build 5x5, attach handlers to cells
   for (let i = 0; i < 25; i++) {
     const cell = document.createElement('div');
     cell.classList.add('outer-cell');
     if (innerToOuter.includes(i)) {
-      cell.classList.add('cell'); // make inner 3x3 visible squares
+      cell.classList.add('cell'); // inner 3x3 visible squares
       cell.addEventListener('click', () => handlePlayerMove(i));
     } else {
       // Outer ring: only works AFTER the game ends (lose or tie)
@@ -239,11 +303,9 @@ function startPuzzle1() {
 function getInnerBoard() {
   return innerToOuter.map(i => outerRing[i]);
 }
-
 function innerEmpty(b) {
   return b.every(v => v === null);
 }
-
 function winner3(b) {
   const lines = [
     [0,1,2],[3,4,5],[6,7,8],
@@ -256,14 +318,11 @@ function winner3(b) {
   if (b.every(x => x !== null)) return 'tie';
   return null;
 }
-
-/* Minimax so CPU (X) plays optimally */
 function minimax(b, isMax, depth=0) {
   const w = winner3(b);
   if (w === 'X') return 10 - depth;
   if (w === 'O') return depth - 10;
   if (w === 'tie') return 0;
-
   if (isMax) {
     let best = -Infinity;
     for (let i=0;i<9;i++) {
@@ -286,18 +345,15 @@ function minimax(b, isMax, depth=0) {
     return best;
   }
 }
-
 function cpuMove() {
   if (!gameActive) return;
   const b = getInnerBoard();
-
-  // First move: center (outer index 12)
+  // First move center
   if (innerEmpty(b) && outerRing[12] === null) {
     makeMove(12, 'X');
     return;
   }
-
-  // Optimal follow-up via minimax
+  // Minimax follow-ups
   let best = -Infinity;
   let bestInner = null;
   for (let i=0;i<9;i++) {
@@ -316,18 +372,12 @@ function cpuMove() {
     makeMove(outerIdx, 'X');
   }
 }
-
 function makeMove(index, player) {
   const cell = document.getElementById('outer-ring').children[index];
   if (!cell || outerRing[index] !== null) return;
-
   cell.textContent = player;
-  if (player === 'O') {
-    cell.classList.add('visibleO');
-  }
+  if (player === 'O') cell.classList.add('visibleO');
   outerRing[index] = player;
-
-  // Only the inner 3x3 determines normal (pre-secret) result
   if (innerToOuter.includes(index)) {
     if (isWinInner(player)) {
       document.getElementById('result').textContent = (player === 'O') ? 'You Win!' : 'You Lose!';
@@ -342,49 +392,37 @@ function makeMove(index, player) {
     }
   }
 }
-
 function handlePlayerMove(index) {
   if (!gameActive) return;
   if (outerRing[index] !== null) return;
   makeMove(index, 'O');
   if (gameActive) cpuMove();
 }
-
-/* Secret: after tie/lose, allow an outer click that makes an extended 3-in-a-row of O */
 function handleOuterClick(index) {
   if (gameActive) return;                 // Not allowed until the game ends
-  if (innerToOuter.includes(index)) return; // Only genuine outer ring
+  if (innerToOuter.includes(index)) return;
   if (outerRing[index] !== null) return;
-
   makeMove(index, 'O'); // visible O placed on the outer ring
-
-  // Check extended triplets (outer + two aligned inner cells)
   if (isExtendedWinO()) {
     document.getElementById('result').textContent = 'You Win!';
     document.getElementById('next1').style.display = 'block';
   }
 }
-
-/* Inner 3×3 result helpers */
 function isWinInner(player) {
   return winsOuter.some(line => line.every(i => outerRing[i] === player));
 }
 function isTieInner() {
   return innerToOuter.every(i => outerRing[i] !== null);
 }
-
-/* Extended win for O: any of the 5×5 extensions equals OOO */
 function isExtendedWinO() {
   return extendedTriplets.some(tri => tri.every(i => outerRing[i] === 'O'));
 }
-
 document.getElementById('reset-btn').addEventListener('click', startPuzzle1);
 
 /* --- Puzzle 2 (Crossword) --- */
 function buildCrossword() {
   const container = document.getElementById('crossword-container');
   container.innerHTML = '';
-
   const grid = [
     ['B','E','L','K','S'],
     ['E','*','O','N','E'],
@@ -397,10 +435,8 @@ function buildCrossword() {
     '1,2':5,'2,0':6,'2,1':7,'3,0':8,
     '3,3':9,'4,0':10
   };
-
   const table = document.createElement('table');
   table.className = 'crossword';
-
   for (let r=0;r<5;r++) {
     const tr = document.createElement('tr');
     for (let c=0;c<5;c++) {
@@ -425,11 +461,9 @@ function buildCrossword() {
     }
     table.appendChild(tr);
   }
-
   container.appendChild(table);
   container.addEventListener('input', checkCrossword);
 }
-
 function checkCrossword() {
   const target = [
     ['B','E','L','K','S'],
@@ -448,6 +482,52 @@ function checkCrossword() {
   });
   if (correct) {
     document.getElementById('next2').style.display = 'inline-block';
+  }
+}
+
+/* --- Puzzle 3 (Clock + Prime check) --- */
+let puzzle3Interval = null;
+const primesUnder60 = new Set([2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59]);
+
+function initPuzzle3() {
+  // clear any previous interval (if returning)
+  if (puzzle3Interval) clearInterval(puzzle3Interval);
+  updateClock(); // initial
+  puzzle3Interval = setInterval(updateClock, 1000);
+
+  // ensure next button hidden on entry
+  document.getElementById('next3').style.display = 'none';
+
+  // attach handlers (idempotent)
+  document.getElementById('primeHourBtn').onclick = checkPrimeTime;
+  document.getElementById('primeMinuteBtn').onclick = checkPrimeTime;
+}
+
+function updateClock() {
+  const now = new Date();
+  const hh = now.getHours();
+  const mm = now.getMinutes();
+  const hhStr = String(hh).padStart(2,'0');
+  const mmStr = String(mm).padStart(2,'0');
+  document.getElementById('hour-value').textContent = hhStr;
+  document.getElementById('minute-value').textContent = mmStr;
+}
+
+function checkPrimeTime() {
+  const hourText = document.getElementById('hour-value').textContent;
+  const minuteText = document.getElementById('minute-value').textContent;
+  const hh = parseInt(hourText, 10);
+  const mm = parseInt(minuteText, 10);
+
+  const messages = [];
+  if (!primesUnder60.has(hh)) messages.push(`${hourText} isn't prime`);
+  if (!primesUnder60.has(mm)) messages.push(`${minuteText} isn't prime`);
+
+  if (messages.length > 0) {
+    alert(messages.join('\n'));
+  } else {
+    // both prime -> reveal Next button
+    document.getElementById('next3').style.display = 'inline-block';
   }
 }
 </script>
