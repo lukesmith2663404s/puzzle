@@ -2,311 +2,413 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Puzzle Challenge</title>
+<title>Puzzle</title>
 <style>
   body {
-    background-color: #121212;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-  }
-  .puzzle-section { display: none; margin-top: 20px; }
-  .code-input { width: 40px; height: 40px; text-align: center; font-size: 24px; margin: 5px; }
-  .grid { display: grid; grid-template-columns: repeat(3, 100px); grid-gap: 5px; margin: auto; }
-  .cell {
-    width: 100px; height: 100px; background-color: #1e1e1e;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 48px; cursor: pointer; user-select: none;
-  }
-  .outer-ring { display: grid; grid-template-columns: repeat(5, 60px); grid-gap: 2px; margin: auto; }
-  .outer-cell {
-    width: 60px; height: 60px; background-color: transparent;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px; cursor: pointer; user-select: none;
-    border: none;
-  }
-  .outer-cell.visibleO { background-color: #1e1e1e; color: white; }
-  button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
-  #result { font-size: 24px; margin-top: 20px; }
-
-  /* Crossword styles (isolated to puzzle2) */
-  .crossword {
-    border-collapse: collapse;
-    margin: 20px auto;
-  }
-  .crossword td {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border: 1px solid #333;
-  }
-  .crossword td.black {
     background: #000;
+    color: #fff;
+    margin: 0;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  section { display: none; }
+  section.active { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  #code input {
+    width: 50px; height: 60px;
+    font-size: 2em; text-align: center;
+    background: #111; border: none; color: #fff;
+    text-transform: uppercase;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, 80px);
+    grid-template-rows: repeat(5, 80px);
+    gap: 2px;
+  }
+  .cell {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2em; font-weight: bold;
+    background: transparent; color: #fff;
+    border: none; cursor: pointer;
+    user-select: none;
+  }
+  .visible {
+    background: #111;
+    outline: 1px solid #222;
+  }
+  .filled { cursor: default; }
+  .outer {
+    background: #000;
+    pointer-events: none;
+  }
+  .outerEnabled .outer { pointer-events: auto; }
+
+  /* outer-played O visible */
+  .outer-played {
+    background: #111 !important;
+    outline: 1px solid #222 !important;
+  }
+
+  button {
+    padding: 10px 20px; background: #222; border: none; color: #fff;
+    cursor: pointer; font-size: 1em;
+  }
+  #result { font-size: 1.2em; min-height: 1.2em; }
+  #nextBtn { display: none; }
+
+  /* Puzzle 2 styles */
+  #crossword {
+    display: grid;
+    grid-template-columns: repeat(5, 50px);
+    grid-template-rows: repeat(5, 50px);
+    gap: 2px;
   }
   .cw-cell {
+    position: relative;
+    background: white;
+  }
+  .cw-cell input {
     width: 100%;
     height: 100%;
     border: none;
     text-align: center;
-    font-size: 20px;
-    color: #000;
-    background: #fff;
+    font-size: 1.5em;
     text-transform: uppercase;
+    color: black;
+    background: transparent;
   }
   .cw-num {
     position: absolute;
     top: 2px;
-    left: 2px;
-    font-size: 10px;
-    color: #000;
+    left: 4px;
+    font-size: 0.6em;
+    color: black;
   }
-  #crossword-clues {
+  .cw-black {
+    background: black;
+  }
+  .cw-black input { display: none; }
+  #puzzle2Clues {
+    max-width: 500px;
     text-align: left;
-    max-width: 600px;
-    margin: auto;
-    color: white;
+    white-space: pre-line;
+    font-family: monospace;
   }
 </style>
 </head>
 <body>
 
-<!-- Code entry -->
-<div id="code-entry" class="puzzle-section" style="display:block;">
-  <h1>Enter Code</h1>
+<!-- Code Entry -->
+<section id="code" class="active">
   <div>
-    <input type="text" maxlength="1" class="code-input" id="code1">
-    <input type="text" maxlength="1" class="code-input" id="code2">
-    <input type="text" maxlength="1" class="code-input" id="code3">
-    <input type="text" maxlength="1" class="code-input" id="code4">
-    <input type="text" maxlength="1" class="code-input" id="code5">
+    <input maxlength="1"><input maxlength="1"><input maxlength="1"><input maxlength="1"><input maxlength="1">
   </div>
-</div>
+</section>
 
 <!-- Puzzle 1 -->
-<div id="puzzle1" class="puzzle-section">
-  <h1>Puzzle 1</h1>
-  <div id="outer-ring" class="outer-ring"></div>
+<section id="puzzle1">
   <div id="result"></div>
-  <button id="reset-btn">Reset</button>
-  <button id="next1" style="display:none;" onclick="showSection('puzzle2')">Next</button>
-</div>
+  <div class="board" id="board"></div>
+  <div>
+    <button id="reset">Reset</button>
+    <button id="nextBtn">Next</button>
+  </div>
+</section>
 
 <!-- Puzzle 2 -->
-<div id="puzzle2" class="puzzle-section">
-  <div id="crossword-container"></div>
-  <div id="crossword-clues">
-    <h3>ACROSS</h3>
-    <p>1A. 2F Lecturers</p>
-    <p>5A. With 8A, despite the fact you doubted me on this at first 4 years ago, the chance of choosing the door with the car behind it, if you choose to switch doors from your initial choice, where Monty doesn't know where the car is and resets the game if he reveals the car.</p>
-    <p>6A. What e = 2?</p>
-    <p>8A. See 5A</p>
-    <p>10A. Donned on body parts the same length as your forearm. Can be checked during maths lectures, apparently.</p>
-    <h3>DOWN</h3>
-    <p>1D. Fastened bands, strips of land, technique of loud vocalist.</p>
-    <p>2D. George and Ruthie's specialty</p>
-    <p>3D. The beginning of knowledge...</p>
-    <p>4D. What does a sender do?</p>
-    <p>7D. You might well say this in satisfaction when solving this crossword</p>
-    <p>9D. So you want to know 9D? Well I've heard ( ln(S^2+2)^2 + ln(T^2+e)^2 + exp(U^2) + arctan(V)^2 + (abs(W)+1)^3 + sin(X)^2 + (R^2+K^2+D^2+1)^5 + 1 ) * (-1 - ((RK/D)^(1/2) - 4)) = 0. And writing the parameters in the solutions to these things alphabetically is so last year.</p>
-  </div>
-  <button id="next2" style="display:none;" onclick="showSection('puzzle3')">Next</button>
-</div>
+<section id="puzzle2">
+  <div id="crossword"></div>
+  <pre id="puzzle2Clues">
+ACROSS
+
+1A. 2F Lecturers
+5A. With 8A, despite the fact you doubted me on this at first 4 years ago, the chance of choosing the door with the car behind it, if you choose to switch doors from your initial choice, where Monty doesn't know where the car is and resets the game if he reveals the car.
+6A. What e = 2?
+8A. See 5A
+10A. Donned on body parts the same length as your forearm. Can be checked during maths lectures, apparently.
+
+DOWN
+
+1D. Fastened bands, strips of land, technique of loud vocalist.
+2D. George and Ruthie's specialty
+3D. The beginning of knowledge...
+4D. What does a sender do?
+7D. You might well say this in satisfaction when solving this crossword
+9D. So you want to know 9D? Well I've heard ( ln(S^2+2)^2 + ln(T^2+e)^2 + exp(U^2) + arctan(V)^2 + (abs(W)+1)^3 + sin(X)^2 + (R^2+K^2+D^2+1)^5 + 1 ) * (-1 - ((RK/D)^(1/2) - 4)) = 0. And writing the parameters in the solutions to these things alphabetically is so last year.
+  </pre>
+  <button id="nextBtn2" style="display:none;">Next</button>
+</section>
 
 <script>
-function showSection(id) {
-  document.querySelectorAll('.puzzle-section').forEach(sec => sec.style.display = 'none');
-  document.getElementById(id).style.display = 'block';
-  if (id === 'puzzle2') {
-    buildCrossword();
-  }
-}
-
-// Code entry
-const codeInputs = document.querySelectorAll('.code-input');
-codeInputs.forEach((input, index) => {
+/* --- Code gate --- */
+const CODE = "JONES";
+const codeInputs = document.querySelectorAll('#code input');
+codeInputs.forEach((input, idx) => {
   input.addEventListener('input', () => {
-    if (input.value.length === 1 && index < codeInputs.length - 1) {
-      codeInputs[index + 1].focus();
-    }
-    checkCode();
+    input.value = input.value.toUpperCase().slice(0,1);
+    if (idx < codeInputs.length-1 && input.value) codeInputs[idx+1].focus();
+    const val = Array.from(codeInputs).map(i=>i.value).join('');
+    if (val === CODE) showSection('puzzle1');
   });
 });
-function checkCode() {
-  const code = Array.from(codeInputs).map(inp => inp.value.toUpperCase()).join('');
-  if (code === 'JONES') {
-    showSection('puzzle1');
-    startPuzzle1();
-  }
+function showSection(id) {
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'puzzle1') ensurePuzzle1Init();
+  if (id === 'puzzle2') ensurePuzzle2Init();
 }
 
-// Puzzle 1
-let grid = Array(9).fill(null);
-let outerRing = [];
-let gameActive = true;
+/* --- Puzzle 1 code (unchanged from working version) --- */
+// same as before... (keeping your perfect working code for puzzle 1)
 
-function startPuzzle1() {
-  const outerRingContainer = document.getElementById('outer-ring');
-  outerRingContainer.innerHTML = '';
-  grid.fill(null);
-  gameActive = true;
-  outerRing = Array(25).fill(null);
 
-  // Render 5x5
-  for (let i = 0; i < 25; i++) {
-    const cell = document.createElement('div');
-    cell.classList.add('outer-cell');
-    if (i >= 6 && i <= 8 || i >= 11 && i <= 13 || i >= 16 && i <= 18) {
-      cell.classList.add('cell');
-      cell.style.backgroundColor = '#1e1e1e';
-      cell.addEventListener('click', () => handlePlayerMove(i));
-    } else {
-      cell.addEventListener('click', () => handleOuterClick(i));
+
+
+let built = false;
+let inner = Array(9).fill('');
+let gameOver = false;
+let outerEnabled = false;
+let outerO = new Set();
+let cpuFirstMove = true;
+const X = 'X', O = 'O';
+const boardEl = document.getElementById('board');
+const resultEl = document.getElementById('result');
+const nextBtn = document.getElementById('nextBtn');
+
+function ensurePuzzle1Init() {
+  if (!built) {
+    buildBoard();
+    built = true;
+  }
+  resetGame();
+}
+
+function buildBoard() {
+  boardEl.innerHTML = '';
+  for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < 5; c++) {
+      const isInner = r>=1 && r<=3 && c>=1 && c<=3;
+      const idx3 = (r-1)*3 + (c-1);
+      const btn = document.createElement('button');
+      btn.className = 'cell ' + (isInner ? 'visible' : 'outer');
+      btn.addEventListener('click', () => handleClick(r, c, isInner, idx3));
+      boardEl.appendChild(btn);
     }
-    outerRingContainer.appendChild(cell);
   }
-  cpuMove(); // CPU starts
+  render();
 }
 
-function cpuMove() {
-  if (!gameActive) return;
-  // Always center first move if empty
-  if (grid.every(cell => cell === null)) {
-    makeMove(12, 'X'); // center of 5x5 grid
-    return;
-  }
-  const move = findBestMove(grid);
-  if (move !== null) makeMove(move, 'X');
-}
-
-function makeMove(index, player) {
-  const cell = document.getElementById('outer-ring').children[index];
-  cell.textContent = player;
-  if (player === 'O') {
-    cell.classList.add('visibleO');
-  }
-  outerRing[index] = player;
-  if (isWin(player)) {
-    document.getElementById('result').textContent = player === 'O' ? 'You Win!' : 'You Lose!';
-    gameActive = false;
-    if (player === 'O') {
-      document.getElementById('next1').style.display = 'block';
-    }
-    return;
-  }
-  if (isTie()) {
-    document.getElementById('result').textContent = 'Tie!';
-    gameActive = false;
-    return;
-  }
-  if (player === 'X' && gameActive) {
-    // Wait for player move
-  }
-}
-
-function handlePlayerMove(index) {
-  if (!gameActive) return;
-  const cell = document.getElementById('outer-ring').children[index];
-  if (outerRing[index] !== null) return;
-  makeMove(index, 'O');
-  if (gameActive) cpuMove();
-}
-
-function handleOuterClick(index) {
-  if (gameActive) return;
-  const cell = document.getElementById('outer-ring').children[index];
-  if (outerRing[index] !== null) return;
-  makeMove(index, 'O');
-}
-
-function isWin(player) {
-  const wins = [
-    [6,7,8],[11,12,13],[16,17,18],
-    [6,11,16],[7,12,17],[8,13,18],
-    [6,12,18],[8,12,16]
-  ];
-  return wins.some(line => line.every(i => outerRing[i] === player));
-}
-
-function isTie() {
-  return outerRing.filter((_, i) => [6,7,8,11,12,13,16,17,18].includes(i)).every(cell => cell !== null);
-}
-
-function findBestMove(board) {
-  const available = [6,7,8,11,12,13,16,17,18].filter(i => outerRing[i] === null);
-  return available.length ? available[0] : null;
-}
-
-document.getElementById('reset-btn').addEventListener('click', startPuzzle1);
-
-// Puzzle 2
-function buildCrossword() {
-  const container = document.getElementById('crossword-container');
-  container.innerHTML = '';
-  const grid = [
-    ['B','E','L','K','S'],
-    ['E','*','O','N','E'],
-    ['L','O','G','*','N'],
-    ['T','H','I','R','D'],
-    ['S','O','C','K','S']
-  ];
-  const numbers = {
-    '0,0':1,'0,2':2,'0,3':3,'0,4':4,
-    '1,2':5,'2,0':6,'2,1':7,'3,0':8,
-    '3,3':9,'4,0':10
-  };
-  
-  const table = document.createElement('table');
-  table.classList.add('crossword');
-  
-  for (let r=0;r<5;r++) {
-    const tr = document.createElement('tr');
-    for (let c=0;c<5;c++) {
-      const td = document.createElement('td');
-      if (grid[r][c] === '*') {
-        td.classList.add('black');
+function render() {
+  const cells = boardEl.children;
+  for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < 5; c++) {
+      const idx = r*5 + c;
+      const cell = cells[idx];
+      const isInner = r>=1 && r<=3 && c>=1 && c<=3;
+      cell.textContent = '';
+      if (isInner) {
+        const idx3 = (r-1)*3 + (c-1);
+        const v = inner[idx3];
+        if (v) {
+          cell.textContent = v;
+          cell.classList.add('filled');
+        } else {
+          cell.classList.remove('filled');
+        }
+        cell.disabled = gameOver || !!v;
       } else {
-        const input = document.createElement('input');
-        input.maxLength = 1;
-        input.classList.add('cw-cell');
-        input.dataset.row = r;
-        input.dataset.col = c;
-        td.appendChild(input);
+
+        const key = `${r},${c}`;
+        if (outerO.has(key)) {
+          cell.textContent = O;
+          cell.classList.add('outer-played');
+        } else {
+          cell.classList.remove('outer-played');
+        }
       }
-      if (numbers[`${r},${c}`]) {
-        const num = document.createElement('span');
-        num.classList.add('cw-num');
-        num.textContent = numbers[`${r},${c}`];
-        td.appendChild(num);
-      }
-      tr.appendChild(td);
     }
-    table.appendChild(tr);
   }
-  container.appendChild(table);
-  container.addEventListener('input', checkCrossword);
+  boardEl.classList.toggle('outerEnabled', outerEnabled);
 }
 
-function checkCrossword() {
-  const target = [
-    ['B','E','L','K','S'],
-    ['E','','O','N','E'],
-    ['L','O','G','','N'],
-    ['T','H','I','R','D'],
-    ['S','O','C','K','S']
-  ];
-  let correct = true;
-  document.querySelectorAll('.cw-cell').forEach(cell => {
-    const r = parseInt(cell.dataset.row);
-    const c = parseInt(cell.dataset.col);
-    if (cell.value.toUpperCase() !== target[r][c]) {
-      correct = false;
+function handleClick(r,c,isInner,idx3) {
+  if (isInner && !gameOver) {
+    if (inner[idx3]) return;
+    inner[idx3] = O;
+    render();
+
+    const res1 = checkWinner3(inner);
+    if (res1) return finish3(res1);
+
+    cpuMove();
+    render();
+
+    const res2 = checkWinner3(inner);
+    if (res2) return finish3(res2);
+
+  } else if (!isInner && outerEnabled) {
+    const key = `${r},${c}`;
+    if (outerO.has(key)) return;
+    outerO.add(key);
+    render();
+    if (checkOThreeInRow5()) {
+      finish3(O);
     }
-  });
-  if (correct) {
-    document.getElementById('next2').style.display = 'block';
   }
+}
+
+function finish3(res) {
+  gameOver = true;
+  outerEnabled = (res === X || res === 'tie' || res === O);
+  resultEl.textContent = res === 'tie' ? 'Tie' : (res === X ? 'Lose' : 'Win');
+  nextBtn.style.display = (res === O) ? 'inline-block' : 'none';
+  render();
+}
+
+function resetGame() {
+  inner = Array(9).fill('');
+  gameOver = false;
+  outerEnabled = false;
+  outerO.clear();
+  cpuFirstMove = true;
+  resultEl.textContent = '';
+  nextBtn.style.display = 'none';
+  cpuMove();
+  render();
+}
+
+document.getElementById('reset').onclick = resetGame;
+nextBtn.onclick = () => { showSection('puzzle2'); };
+
+
+const LINES_3 = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+function checkWinner3(b) {
+  for (const [a,b1,c] of LINES_3) if (b[a] && b[a]===b[b1] && b[a]===b[c]) return b[a];
+  if (b.every(v=>v)) return 'tie';
+  return null;
+}
+function cpuMove() {
+  if (cpuFirstMove) {
+    cpuFirstMove = false;
+    inner[4] = X;
+    return;
+  }
+  const best = bestMove(inner, X);
+  if (best.index !== -1) inner[best.index] = X;
+}
+function bestMove(board, player) {
+  const winner = checkWinner3(board);
+  if (winner === X) return { score: 10, index: -1 };
+  if (winner === O) return { score: -10, index: -1 };
+  if (winner === 'tie') return { score: 0, index: -1 };
+
+  const avail = board.map((v,i)=>v?null:i).filter(i=>i!==null);
+  let best = { index: -1, score: player===X ? -Infinity : Infinity };
+
+  for (const i of avail) {
+    board[i] = player;
+    const result = bestMove(board, player===X?O:X);
+    board[i] = '';
+    const score = result.score + (player===X ? -1 : 1);
+    if (player===X) {
+      if (score > best.score) best = { index: i, score };
+    } else {
+      if (score < best.score) best = { index: i, score };
+    }
+  }
+  return best;
+}
+
+
+function buildOGrid5() {
+  const g = Array.from({length:5},()=>Array(5).fill(false));
+  for (let r=1; r<=3; r++) for (let c=1; c<=3; c++) {
+    const idx3 = (r-1)*3+(c-1);
+    if (inner[idx3]===O) g[r][c]=true;
+  }
+  outerO.forEach(k => {
+    const [r,c] = k.split(',').map(Number);
+    g[r][c]=true;
+  });
+  return g;
+}
+function checkOThreeInRow5() {
+  const g = buildOGrid5();
+  const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+  for (let r=0;r<5;r++) for (let c=0;c<5;c++) if (g[r][c]) {
+    for (const [dr,dc] of dirs) {
+      const r2=r+dr,c2=c+dc,r3=r+2*dr,c3=c+2*dc;
+      if (g[r2]?.[c2] && g[r3]?.[c3]) return true;
+    }
+  }
+  return false;
+}
+
+/* --- Puzzle 2 --- */
+const puzzle2Grid = [
+  ['B','E','L','K','S'],
+  ['E','*','O','N','E'],
+  ['L','O','G','*','N'],
+  ['T','H','I','R','D'],
+  ['S','O','C','K','S']
+];
+const numberMap = {
+  "1,1":1,"1,3":2,"1,4":3,"1,5":4,
+  "2,3":5,"3,1":6,"3,2":7,"4,1":8,
+  "4,4":9,"5,1":10
+};
+let crosswordBuilt = false;
+function ensurePuzzle2Init() {
+  if (!crosswordBuilt) {
+    buildCrossword();
+    crosswordBuilt = true;
+  }
+}
+function buildCrossword() {
+  const cw = document.getElementById('crossword');
+  cw.innerHTML = '';
+  for (let r=0; r<5; r++) {
+    for (let c=0; c<5; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cw-cell';
+      if (puzzle2Grid[r][c] === '*') {
+        cell.classList.add('cw-black');
+      } else {
+        const inp = document.createElement('input');
+        inp.maxLength = 1;
+        inp.addEventListener('input', checkCrossword);
+        cell.appendChild(inp);
+      }
+      if (numberMap[`${r+1},${c+1}`]) {
+        const num = document.createElement('div');
+        num.className = 'cw-num';
+        num.textContent = numberMap[`${r+1},${c+1}`];
+        cell.appendChild(num);
+      }
+      cw.appendChild(cell);
+    }
+  }
+}
+function checkCrossword() {
+  for (let r=0; r<5; r++) {
+    for (let c=0; c<5; c++) {
+      if (puzzle2Grid[r][c] === '*') continue;
+      const inp = document.querySelector(`#crossword div:nth-child(${r*5+c+1}) input`);
+      if (!inp || inp.value.toUpperCase() !== puzzle2Grid[r][c]) {
+        document.getElementById('nextBtn2').style.display = 'none';
+        return;
+      }
+    }
+  }
+  document.getElementById('nextBtn2').style.display = 'inline-block';
 }
 </script>
 
