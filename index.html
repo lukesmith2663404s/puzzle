@@ -151,17 +151,9 @@
     <div id="c4-board" class="c4-board" aria-label="Connect Four board"></div>
     <div class="c4-controls">
       <button id="c4-reset">Reset</button>
+      <button id="c4-auto" title="Toggle CPU goes first">CPU First: Off</button>
     </div>
-    <!-- "haha" message appears here briefly when CPU does its unfair double move -->
-    <div id="haha-msg" style="height:20px; margin-top:6px;"></div>
-    <!-- Next appears after the PLAYER wins -->
-    <button id="next4" style="display:none; margin-top:8px;" onclick="showSection('puzzle5')">Next</button>
   </div>
-</div>
-
-<!-- Puzzle 5 placeholder -->
-<div id="puzzle5" class="puzzle-section">
-  <h1>Puzzle 5 (coming soon)</h1>
 </div>
 
 <script>
@@ -349,30 +341,33 @@ function checkPrimeTimeBoth(){
   }
 }
 
-/* ---------- Puzzle 4: Connect Four (smart CPU with unfair double-first-move) ---------- */
+/* ---------- Puzzle 4: Connect Four (smart CPU) ---------- */
 /* Implementation notes:
    - Board rows = 6, cols = 7
    - Player = 1 (human, yellow), CPU = 2 (red)
    - CPU uses minimax + alpha-beta with depth limit and heuristic evaluation
-   - CPU always plays first
-   - On CPU's first turn, 1/3 chance of making two optimal moves (second move computed after first)
 */
 let c4_board = null;
 let c4_rows = 6, c4_cols = 7;
 let c4_currentPlayer = 1; // 1=human, 2=cpu
 let c4_gameOver = false;
-let c4_cpuFirst = true; // CPU always starts
-let c4_firstCpuMoveDone = false; // tracks whether CPU has completed its first turn (for double-move chance)
+let c4_cpuFirst = false;
 
 function initConnect4(){
   // If already built, don't rebind unnecessarily
   if (!document.getElementById('c4-board').dataset.inited) {
     buildConnect4Board();
     document.getElementById('c4-reset').addEventListener('click', ()=>startConnect4(true));
-    // removed CPU-first toggle binding intentionally per your request
+    document.getElementById('c4-auto').addEventListener('click', toggleCpuFirst);
     document.getElementById('c4-board').dataset.inited = '1';
   }
   startConnect4(false);
+}
+
+function toggleCpuFirst(){
+  c4_cpuFirst = !c4_cpuFirst;
+  document.getElementById('c4-auto').textContent = `CPU First: ${c4_cpuFirst ? 'On' : 'Off'}`;
+  startConnect4(true);
 }
 
 function buildConnect4Board(){
@@ -401,20 +396,14 @@ function startConnect4(skipCpu){
   // initialize board: 6 rows x 7 cols filled with 0
   c4_board = Array.from({length:c4_rows},()=>Array(c4_cols).fill(0));
   c4_gameOver = false;
-  c4_firstCpuMoveDone = false;
-  // CPU always starts
+  // default human starts unless cpuFirst true
   c4_currentPlayer = c4_cpuFirst ? 2 : 1;
-  // hide next button at start
-  const next4 = document.getElementById('next4');
-  if (next4) next4.style.display = 'none';
-  // clear haha
-  const haha = document.getElementById('haha-msg');
-  if (haha) haha.textContent = '';
   renderConnect4();
   document.getElementById('c4-status').textContent = c4_currentPlayer===1 ? 'Your move.' : 'CPU thinking...';
   if (c4_currentPlayer===2 && !skipCpu) {
     setTimeout(cpuPlay, 300);
   } else if (c4_currentPlayer===2 && skipCpu) {
+    // if skipCpu true (e.g. toggled), let CPU move immediately after short delay
     setTimeout(cpuPlay, 300);
   }
 }
@@ -448,9 +437,6 @@ function playerDrop(col){
   if (checkWinBoard(c4_board, 1)) {
     c4_gameOver = true;
     document.getElementById('c4-status').textContent = 'You win!';
-    // show Next button after player wins
-    const next4 = document.getElementById('next4');
-    if (next4) next4.style.display = 'inline-block';
     return;
   }
   if (isBoardFull(c4_board)) {
@@ -475,7 +461,7 @@ function cpuPlay(){
   if (c4_gameOver) return;
   // choose move via minimax with alpha-beta
   const depth = 5; // depth limit (reasonable compromise)
-  let [score, bestCol] = c4_minimaxRoot(c4_board, depth);
+  const [score, bestCol] = c4_minimaxRoot(c4_board, depth);
   if (bestCol === null) {
     // fallback: first available
     for (let c=0;c<c4_cols;c++){
@@ -499,45 +485,6 @@ function cpuPlay(){
       }
     }
   }
-
-  /* --- Unfair double-move logic on CPU's first turn --- */
-  if (!c4_firstCpuMoveDone) {
-    c4_firstCpuMoveDone = true;
-    // 1/3 chance to make a second strategic move immediately
-    if (Math.random() < (1/3)) {
-      // compute second optimal move now
-      let [score2, bestCol2] = c4_minimaxRoot(c4_board, depth);
-      if (bestCol2 === null) {
-        for (let c=0;c<c4_cols;c++){
-          if (firstEmptyRow(c) !== -1) { bestCol2 = c; break; }
-        }
-      }
-      if (bestCol2 !== null) {
-        const row2 = firstEmptyRow(bestCol2);
-        if (row2 !== -1) {
-          c4_board[row2][bestCol2] = 2;
-          renderConnect4();
-          // show "haha" briefly under reset per your request
-          const haha = document.getElementById('haha-msg');
-          if (haha) {
-            haha.textContent = 'haha';
-            setTimeout(()=>{ haha.textContent = ''; }, 1000);
-          }
-          if (checkWinBoard(c4_board, 2)) {
-            c4_gameOver = true;
-            document.getElementById('c4-status').textContent = 'CPU wins.';
-            return;
-          }
-          if (isBoardFull(c4_board)) {
-            c4_gameOver = true;
-            document.getElementById('c4-status').textContent = 'Tie!';
-            return;
-          }
-        }
-      }
-    }
-  }
-
   c4_currentPlayer = 1;
   document.getElementById('c4-status').textContent = 'Your move.';
 }
@@ -644,3 +591,61 @@ function validColumns(board){
 /* copy board */
 function copyBoard(board){
   return board.map(row => row.slice());
+}
+
+/* apply move */
+function applyMove(board, col, player){
+  const nb = copyBoard(board);
+  for (let r=c4_rows-1;r>=0;r--){
+    if (nb[r][col] === 0) { nb[r][col] = player; break; }
+  }
+  return nb;
+}
+
+/* Root wrapper: returns [score, bestCol] from minimax */
+function c4_minimaxRoot(board, depth){
+  const cols = validColumns(board);
+  let bestScore = -Infinity;
+  let bestCol = null;
+  for (const col of cols){
+    const nb = applyMove(board, col, 2); // cpu move
+    const score = c4_minimax(nb, depth-1, -Infinity, Infinity, false);
+    if (score > bestScore) { bestScore = score; bestCol = col; }
+  }
+  return [bestScore, bestCol];
+}
+
+/* minimax with alpha-beta pruning:
+   playerTurn: true if CPU's turn (maximizer), false if human (minimizer)
+*/
+function c4_minimax(board, depth, alpha, beta, maximizingPlayer){
+  if (checkWinBoard(board, 2)) return 100000; // cpu wins
+  if (checkWinBoard(board, 1)) return -100000; // player wins
+  if (depth === 0 || isBoardFull(board)) return evaluateBoard(board);
+
+  const cols = validColumns(board);
+  if (maximizingPlayer){
+    let value = -Infinity;
+    for (const col of cols){
+      const nb = applyMove(board, col, 2);
+      const score = c4_minimax(nb, depth-1, alpha, beta, false);
+      value = Math.max(value, score);
+      alpha = Math.max(alpha, value);
+      if (alpha >= beta) break;
+    }
+    return value;
+  } else {
+    let value = Infinity;
+    for (const col of cols){
+      const nb = applyMove(board, col, 1);
+      const score = c4_minimax(nb, depth-1, alpha, beta, true);
+      value = Math.min(value, score);
+      beta = Math.min(beta, value);
+      if (alpha >= beta) break;
+    }
+    return value;
+  }
+}
+</script>
+</body>
+</html>
