@@ -1,328 +1,646 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Puzzle Sequence</title>
+<meta charset="utf-8" />
+<title>Puzzle Challenge</title>
 <style>
-    body {
-        background-color: black;
-        color: white;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin: 0;
-        padding: 0;
-    }
-    .hidden {
-        display: none;
-    }
-    input.code-input {
-        width: 40px;
-        height: 40px;
-        font-size: 24px;
-        text-align: center;
-        margin: 5px;
-        background-color: #222;
-        color: white;
-        border: 1px solid #555;
-    }
-    button {
-        background-color: #444;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        margin: 10px;
-        cursor: pointer;
-    }
-    button:disabled {
-        background-color: #222;
-        cursor: not-allowed;
-    }
-    /* Puzzle 1 */
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(5, 60px);
-        grid-template-rows: repeat(5, 60px);
-        gap: 2px;
-        justify-content: center;
-        margin-top: 20px;
-    }
-    .cell {
-        background-color: #333;
-        font-size: 24px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        color: white;
-    }
-    .outer-cell {
-        background-color: black;
-        cursor: default;
-    }
-    /* Puzzle 2 */
-    .crossword {
-        margin-top: 40px;
-        display: inline-block;
-        border-collapse: collapse;
-    }
-    .crossword td {
-        width: 40px;
-        height: 40px;
-        border: 1px solid white;
-        position: relative;
-    }
-    .crossword input {
-        width: 100%;
-        height: 100%;
-        border: none;
-        text-align: center;
-        font-size: 20px;
-        background-color: white;
-        color: black;
-    }
-    .crossword .black {
-        background-color: black;
-    }
-    .crossword .number {
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        font-size: 10px;
-        color: black;
-    }
-    /* Puzzle 3 */
-    #clock {
-        font-size: 48px;
-        margin-top: 20px;
-    }
-    /* Puzzle 4 */
-    .connect4-board {
-        display: grid;
-        grid-template-columns: repeat(7, 60px);
-        grid-template-rows: repeat(6, 60px);
-        gap: 2px;
-        justify-content: center;
-        margin: 20px auto;
-        background-color: #000;
-    }
-    .connect4-cell {
-        width: 60px;
-        height: 60px;
-        background-color: #333;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 0;
-    }
-    .red { background-color: red; }
-    .yellow { background-color: yellow; }
+  /* Base + site-wide styles — kept from your working version */
+  * { box-sizing: border-box; }
+  html,body { height:100%; }
+  body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  .puzzle-section { display: none; margin-top: 20px; }
+
+  /* Code entry (locked-in look) */
+  .code-input {
+    width: 40px; height: 40px;
+    text-align: center; font-size: 24px; margin: 5px;
+    background: #1e1e1e !important; color: #fff !important;
+    border: 1px solid #333 !important; outline: none;
+    text-transform: uppercase;
+  }
+
+  /* Puzzle1: tic-tac-toe / outer ring (kept) */
+  .outer-ring {
+    display: grid;
+    grid-template-columns: repeat(5, 60px);
+    grid-gap: 2px;
+    margin: 0 auto;
+    justify-content: center;
+    justify-items: center;
+  }
+  .outer-cell { width:60px; height:60px; background:transparent; display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; user-select:none; border:none; }
+  .cell { width:60px; height:60px; background:#1e1e1e; display:flex; align-items:center; justify-content:center; font-size:32px; }
+  .outer-cell.visibleO { background:#1e1e1e; color:#fff; }
+
+  #result { font-size:24px; margin-top:12px; min-height:28px; }
+  button { margin-top:12px; padding:10px 20px; font-size:16px; }
+
+  /* Puzzle2 crossword (kept and scoped) */
+  #puzzle2 .crossword { border-collapse:collapse; table-layout:fixed; margin:60px auto 12px auto; }
+  #puzzle2 .crossword td { position:relative; width:40px; height:40px; border:1px solid #444 !important; padding:0; background:#111; }
+  #puzzle2 .crossword td.black { background:#000 !important; }
+  #puzzle2 .cw-cell { width:100%; height:100%; border:none; outline:none; text-align:center; font-size:20px; color:#000 !important; background:#fff !important; text-transform:uppercase; display:block; }
+  #puzzle2 .cw-num { position:absolute; top:2px; left:2px; font-size:10px; color:#000; z-index:2; pointer-events:none; }
+  #crossword-wrapper { display:flex; flex-direction:column; align-items:center; width:100%; }
+  #crossword-clues { text-align:left; max-width:600px; margin:8px auto 24px auto; color:white; }
+
+  /* Puzzle3 clock (scoped to puzzle3) */
+  #puzzle3 .clock-wrapper { margin-top:30px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #puzzle3 .clock { display:flex; align-items:center; gap:12px; font-family:inherit; color:white; font-size:48px; letter-spacing:2px; }
+  #puzzle3 .half { display:flex; flex-direction:column; align-items:center; min-width:90px; }
+  #puzzle3 .half .value { background:#1e1e1e; padding:8px 16px; border-radius:6px; min-width:60px; text-align:center; font-size:40px; color:white; }
+  #puzzle3 .prime-btn { margin-top:8px; padding:8px 12px; font-size:14px; cursor:pointer; }
+  #puzzle3 #next3 { display:none; margin-top:8px; }
+
+  /* Puzzle4 Connect Four (scoped) */
+  #puzzle4 .c4-wrapper { margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #puzzle4 .c4-board { display:grid; grid-template-columns: repeat(7, 56px); grid-gap:6px; background:transparent; padding:6px; }
+  #puzzle4 .c4-cell { width:56px; height:56px; background:#111; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
+  #puzzle4 .disc { width:44px; height:44px; border-radius:50%; background:transparent; box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset; }
+  #puzzle4 .disc.player { background: #ffd54f; }   /* player color (O-ish) */
+  #puzzle4 .disc.cpu { background: #ff6b6b; }      /* cpu color (X-ish) */
+  #puzzle4 .c4-controls { display:flex; gap:8px; align-items:center; }
+  #c4-status { margin-top:8px; min-height:24px; }
+  #c4-reset { margin-left:8px; }
+  /* pointer-none when disabled */
+  .disabled { pointer-events: none; opacity: 0.7; }
 </style>
 </head>
 <body>
 
-<!-- Code Entry -->
-<div id="code-entry">
-    <h1>Enter Code</h1>
-    <div>
-        <input class="code-input" maxlength="1">
-        <input class="code-input" maxlength="1">
-        <input class="code-input" maxlength="1">
-        <input class="code-input" maxlength="1">
-        <input class="code-input" maxlength="1">
-    </div>
+<!-- Code entry -->
+<div id="code-entry" class="puzzle-section" style="display:block;">
+  <h1>Enter Code</h1>
+  <div>
+    <input type="text" maxlength="1" class="code-input" id="code1">
+    <input type="text" maxlength="1" class="code-input" id="code2">
+    <input type="text" maxlength="1" class="code-input" id="code3">
+    <input type="text" maxlength="1" class="code-input" id="code4">
+    <input type="text" maxlength="1" class="code-input" id="code5">
+  </div>
 </div>
 
 <!-- Puzzle 1 -->
-<div id="puzzle1" class="hidden">
-    <h2>Puzzle 1</h2>
-    <div class="grid" id="grid1"></div>
-    <p id="result1"></p>
-    <button id="reset1">Reset</button>
-    <button id="next1" class="hidden" onclick="showSection('puzzle2')">Next</button>
+<div id="puzzle1" class="puzzle-section">
+  <h1>Puzzle 1</h1>
+  <div id="outer-ring" class="outer-ring"></div>
+  <div id="result"></div>
+  <button id="reset-btn">Reset</button>
+  <button id="next1" style="display:none;" onclick="showSection('puzzle2')">Next</button>
 </div>
 
 <!-- Puzzle 2 -->
-<div id="puzzle2" class="hidden">
-    <h2>Puzzle 2</h2>
-    <table class="crossword" id="crossword"></table>
-    <button id="next2" class="hidden" onclick="showSection('puzzle3')">Next</button>
-    <div id="clues">
-<pre>
-ACROSS
-1A. 2F Lecturers
-5A. With 8A, despite the fact...
-6A. What e = 2?
-8A. See 5A
-10A. Donned on body parts...
+<div id="puzzle2" class="puzzle-section">
+  <div id="crossword-wrapper">
+    <div id="crossword-container"></div>
+    <button id="next2" style="display:none;" onclick="showSection('puzzle3')">Next</button>
+  </div>
 
-DOWN
-1D. Fastened bands...
-2D. George and Ruthie's...
-3D. The beginning of knowledge...
-4D. What does a sender do?
-7D. You might well say this...
-9D. So you want to know 9D? ...
-</pre>
-    </div>
+  <div id="crossword-clues">
+    <h3>ACROSS</h3>
+    <p>1A. 2F Lecturers</p>
+    <p>5A. With 8A, despite the fact you doubted me on this at first 4 years ago, the chance of choosing the door with the car behind it, if you choose to switch doors from your initial choice, where Monty doesn't know where the car is and resets the game if he reveals the car.</p>
+    <p>6A. What e = 2?</p>
+    <p>8A. See 5A</p>
+    <p>10A. Donned on body parts the same length as your forearm. Can be checked during maths lectures, apparently.</p>
+    <h3>DOWN</h3>
+    <p>1D. Fastened bands, strips of land, technique of loud vocalist.</p>
+    <p>2D. George and Ruthie's specialty</p>
+    <p>3D. The beginning of knowledge...</p>
+    <p>4D. What does a sender do?</p>
+    <p>7D. You might well say this in satisfaction when solving this crossword</p>
+    <p>9D. So you want to know 9D? Well I've heard ( ln(S^2+2)^2 + ln(T^2+e)^2 + exp(U^2) + arctan(V)^2 + (abs(W)+1)^3 + sin(X)^2 + (R^2+K^2+D^2+1)^5 + 1 ) * (-1 - ((RK/D)^(1/2) - 4)) = 0. And writing the parameters in the solutions to these things alphabetically is so last year.</p>
+  </div>
 </div>
 
 <!-- Puzzle 3 -->
-<div id="puzzle3" class="hidden">
-    <h2>Puzzle 3</h2>
-    <div id="clock"></div>
-    <button id="primeBtn3">Prime Time?</button>
-    <p id="primeMsg3"></p>
-    <button id="next3" class="hidden" onclick="showSection('puzzle4')">Next</button>
+<div id="puzzle3" class="puzzle-section">
+  <h1>Puzzle 3</h1>
+
+  <div class="clock-wrapper" aria-live="polite">
+    <div class="clock" id="clock">
+      <div class="half" id="hour-half">
+        <div class="value" id="hour-value">00</div>
+      </div>
+
+      <div style="font-size:40px;color:white;opacity:0.9;">:</div>
+
+      <div class="half" id="minute-half">
+        <div class="value" id="minute-value">00</div>
+      </div>
+    </div>
+
+    <button id="primeCheckBtn" class="prime-btn">Prime Time?</button>
+    <button id="next3" onclick="showSection('puzzle4')">Next</button>
+  </div>
 </div>
 
-<!-- Puzzle 4 -->
-<div id="puzzle4" class="hidden">
-    <h2>Puzzle 4 - Connect 4</h2>
-    <div class="connect4-board" id="connect4Board"></div>
-    <button id="reset4">Reset</button>
-    <p id="hahaMsg" style="height:20px;"></p>
-    <button id="next4" class="hidden" onclick="showSection('puzzle5')">Next</button>
+<!-- Puzzle 4: Connect Four -->
+<div id="puzzle4" class="puzzle-section">
+  <h1>Puzzle 4 — Connect 4</h1>
+  <div class="c4-wrapper">
+    <div id="c4-status">Your move.</div>
+    <div id="c4-board" class="c4-board" aria-label="Connect Four board"></div>
+    <div class="c4-controls">
+      <button id="c4-reset">Reset</button>
+    </div>
+    <!-- "haha" message appears here briefly when CPU does its unfair double move -->
+    <div id="haha-msg" style="height:20px; margin-top:6px;"></div>
+    <!-- Next appears after the PLAYER wins -->
+    <button id="next4" style="display:none; margin-top:8px;" onclick="showSection('puzzle5')">Next</button>
+  </div>
 </div>
 
-<!-- Puzzle 5 -->
-<div id="puzzle5" class="hidden">
-    <h2>Puzzle 5 coming soon</h2>
+<!-- Puzzle 5 placeholder -->
+<div id="puzzle5" class="puzzle-section">
+  <h1>Puzzle 5 (coming soon)</h1>
 </div>
 
 <script>
-/* ===== Code Entry ===== */
-const codeInputs = document.querySelectorAll('.code-input');
-codeInputs.forEach((input, idx) => {
-    input.addEventListener('input', () => {
-        if (input.value.length === 1 && idx < codeInputs.length - 1) {
-            codeInputs[idx + 1].focus();
-        }
-        checkCode();
-    });
-});
-function checkCode() {
-    const code = Array.from(codeInputs).map(i => i.value.toUpperCase()).join('');
-    if (code === 'JONES') showSection('puzzle1');
-}
+/* ---------- Section switching / code entry (unchanged behaviour) ---------- */
 function showSection(id) {
-    document.querySelectorAll('body > div').forEach(div => div.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.puzzle-section').forEach(sec => sec.style.display = 'none');
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  if (id === 'puzzle1') startPuzzle1();
+  if (id === 'puzzle2') buildCrossword();
+  if (id === 'puzzle3') initPuzzle3();
+  if (id === 'puzzle4') initConnect4();
 }
 
-/* ===== Puzzle 1 ===== */
-// Puzzle 1 code remains unchanged (omitted for brevity, assume working from your current version)
-
-/* ===== Puzzle 2 ===== */
-// Puzzle 2 code remains unchanged (omitted for brevity, assume working from your current version)
-
-/* ===== Puzzle 3 ===== */
-const primesUnder60 = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59];
-function updateClock() {
-    const now = new Date();
-    const hh = now.getHours().toString().padStart(2,'0');
-    const mm = now.getMinutes().toString().padStart(2,'0');
-    document.getElementById('clock').textContent = `${hh} : ${mm}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
-document.getElementById('primeBtn3').addEventListener('click', () => {
-    const [hh, mm] = document.getElementById('clock').textContent.split(' : ').map(n=>parseInt(n));
-    let msgs = [];
-    if (!primesUnder60.includes(hh)) msgs.push(`${hh} isn't prime`);
-    if (!primesUnder60.includes(mm)) msgs.push(`${mm} isn't prime`);
-    if (msgs.length === 0) {
-        document.getElementById('next3').classList.remove('hidden');
-    } else {
-        document.getElementById('primeMsg3').textContent = msgs.join(' | ');
+/* Code entry */
+const codeInputs = document.querySelectorAll('.code-input');
+codeInputs.forEach((input, index) => {
+  input.addEventListener('input', () => {
+    input.value = input.value.toUpperCase();
+    if (input.value.length === 1 && index < codeInputs.length - 1) {
+      codeInputs[index+1].focus();
     }
+    checkCode();
+  });
 });
+function checkCode(){
+  const code = Array.from(codeInputs).map(i=>i.value.toUpperCase()).join('');
+  if (code === 'JONES') {
+    showSection('puzzle1');
+  }
+}
 
-/* ===== Puzzle 4 ===== */
-const ROWS = 6, COLS = 7;
-let board4, currentPlayer4, gameOver4, cpuFirstTurnDone;
-function initConnect4() {
-    board4 = Array.from({length: ROWS}, () => Array(COLS).fill(null));
-    currentPlayer4 = 'CPU';
-    gameOver4 = false;
-    cpuFirstTurnDone = false;
-    renderBoard4();
-    if (currentPlayer4 === 'CPU') cpuMove4();
-}
-function renderBoard4() {
-    const boardDiv = document.getElementById('connect4Board');
-    boardDiv.innerHTML = '';
-    for (let r=0; r<ROWS; r++) {
-        for (let c=0; c<COLS; c++) {
-            const cell = document.createElement('div');
-            cell.className = 'connect4-cell';
-            if (board4[r][c] === 'CPU') cell.classList.add('red');
-            if (board4[r][c] === 'Player') cell.classList.add('yellow');
-            cell.addEventListener('click', () => playerMove4(c));
-            boardDiv.appendChild(cell);
-        }
+/* ---------- Puzzle 1 (kept as before) ---------- */
+let outerRing = [];
+let gameActive = true;
+const innerToOuter = [6,7,8,11,12,13,16,17,18];
+const winsOuter = [
+  [6,7,8],[11,12,13],[16,17,18],
+  [6,11,16],[7,12,17],[8,13,18],
+  [6,12,18],[8,12,16]
+];
+const extendedTriplets = [
+  [5,6,7],[7,8,9],
+  [10,11,12],[12,13,14],
+  [15,16,17],[17,18,19],
+  [1,6,11],[11,16,21],
+  [2,7,12],[12,17,22],
+  [3,8,13],[13,18,23],
+  [0,6,12],[12,18,24],
+  [4,8,12],[12,16,20]
+];
+function startPuzzle1() {
+  const outerRingContainer = document.getElementById('outer-ring');
+  outerRingContainer.innerHTML = '';
+  gameActive = true;
+  outerRing = Array(25).fill(null);
+  document.getElementById('result').textContent = '';
+  document.getElementById('next1').style.display = 'none';
+  for (let i=0;i<25;i++){
+    const cell = document.createElement('div');
+    cell.classList.add('outer-cell');
+    if (innerToOuter.includes(i)) {
+      cell.classList.add('cell');
+      cell.addEventListener('click', ()=>handlePlayerMove(i));
+    } else {
+      cell.addEventListener('click', ()=>handleOuterClick(i));
     }
+    outerRingContainer.appendChild(cell);
+  }
+  cpuMove();
 }
-function dropDisc4(col, player) {
-    for (let r=ROWS-1; r>=0; r--) {
-        if (!board4[r][col]) {
-            board4[r][col] = player;
-            return true;
-        }
+function getInnerBoard(){ return innerToOuter.map(i=>outerRing[i]); }
+function innerEmpty(b){ return b.every(v=>v===null); }
+function winner3(b){ 
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (const [a,b2,c] of lines) if (b[a] && b[a]===b[b2] && b[a]===b[c]) return b[a];
+  if (b.every(x=>x!==null)) return 'tie';
+  return null;
+}
+function minimax(b,isMax,depth=0){
+  const w = winner3(b);
+  if (w==='X') return 10-depth;
+  if (w==='O') return depth-10;
+  if (w==='tie') return 0;
+  if (isMax){
+    let best=-Infinity;
+    for (let i=0;i<9;i++) if (b[i]===null){ b[i]='X'; best=Math.max(best, minimax(b,false,depth+1)); b[i]=null; }
+    return best;
+  } else {
+    let best=Infinity;
+    for (let i=0;i<9;i++) if (b[i]===null){ b[i]='O'; best=Math.min(best, minimax(b,true,depth+1)); b[i]=null; }
+    return best;
+  }
+}
+function cpuMove(){
+  if (!gameActive) return;
+  const b = getInnerBoard();
+  if (innerEmpty(b) && outerRing[12]===null) { makeMove(12,'X'); return; }
+  let best=-Infinity, bestInner=null;
+  for (let i=0;i<9;i++) if (b[i]===null){
+    b[i]='X';
+    const score = minimax(b,false,0);
+    b[i]=null;
+    if (score>best){ best=score; bestInner=i; }
+  }
+  if (bestInner!==null) makeMove(innerToOuter[bestInner],'X');
+}
+function makeMove(index,player){
+  const cell = document.getElementById('outer-ring').children[index];
+  if (!cell || outerRing[index]!==null) return;
+  cell.textContent = player;
+  if (player==='O') cell.classList.add('visibleO');
+  outerRing[index]=player;
+  if (innerToOuter.includes(index)){
+    if (isWinInner(player)){ document.getElementById('result').textContent = player==='O' ? 'You Win!' : 'You Lose!'; gameActive=false; if (player==='O') document.getElementById('next1').style.display='block'; return; }
+    if (isTieInner()){ document.getElementById('result').textContent='Tie!'; gameActive=false; return; }
+  }
+}
+function handlePlayerMove(index){ if (!gameActive) return; if (outerRing[index]!==null) return; makeMove(index,'O'); if (gameActive) cpuMove(); }
+function handleOuterClick(index){ if (gameActive) return; if (innerToOuter.includes(index)) return; if (outerRing[index]!==null) return; makeMove(index,'O'); if (isExtendedWinO()){ document.getElementById('result').textContent='You Win!'; document.getElementById('next1').style.display='block'; } }
+function isWinInner(player){ return winsOuter.some(line=>line.every(i=>outerRing[i]===player)); }
+function isTieInner(){ return innerToOuter.every(i=>outerRing[i]!==null); }
+function isExtendedWinO(){ return extendedTriplets.some(tri=>tri.every(i=>outerRing[i]==='O')); }
+document.getElementById('reset-btn').addEventListener('click', startPuzzle1);
+
+/* ---------- Puzzle 2 (crossword) ---------- */
+function buildCrossword(){
+  const container = document.getElementById('crossword-container');
+  container.innerHTML='';
+  const grid=[['B','E','L','K','S'],['E','*','O','N','E'],['L','O','G','*','N'],['T','H','I','R','D'],['S','O','C','K','S']];
+  const numbers={'0,0':1,'0,2':2,'0,3':3,'0,4':4,'1,2':5,'2,0':6,'2,1':7,'3,0':8,'3,3':9,'4,0':10};
+  const table=document.createElement('table'); table.className='crossword';
+  for (let r=0;r<5;r++){ const tr=document.createElement('tr');
+    for (let c=0;c<5;c++){ const td=document.createElement('td');
+      if (grid[r][c]==='*') td.classList.add('black'); else { const input=document.createElement('input'); input.maxLength=1; input.className='cw-cell'; input.dataset.row=r; input.dataset.col=c; td.appendChild(input); }
+      if (numbers[`${r},${c}`]){ const num=document.createElement('span'); num.className='cw-num'; num.textContent=numbers[`${r},${c}`]; td.appendChild(num); }
+      tr.appendChild(td);
     }
-    return false;
+    table.appendChild(tr);
+  }
+  container.appendChild(table);
+  container.addEventListener('input', checkCrossword);
 }
-function cpuMove4() {
-    if (gameOver4) return;
-    // simple "smart" move placeholder (choose first available col)
-    let moveCols = [...Array(COLS).keys()].filter(c => !board4[0][c]);
-    if (moveCols.length === 0) return;
-    let col = moveCols[Math.floor(Math.random()*moveCols.length)];
-    dropDisc4(col, 'CPU');
-    // unfair first turn chance
-    if (!cpuFirstTurnDone && Math.random() < 1/3) {
-        let col2 = moveCols.filter(c => c !== col);
-        if (col2.length) {
-            col2 = col2[Math.floor(Math.random()*col2.length)];
-            dropDisc4(col2, 'CPU');
-        }
-        document.getElementById('hahaMsg').textContent = 'haha';
-        setTimeout(()=>document.getElementById('hahaMsg').textContent='',1000);
+function checkCrossword(){
+  const target=[['B','E','L','K','S'],['E','','O','N','E'],['L','O','G','','N'],['T','H','I','R','D'],['S','O','C','K','S']];
+  let correct=true;
+  document.querySelectorAll('#crossword-container .cw-cell').forEach(cell=>{
+    const r=parseInt(cell.dataset.row,10), c=parseInt(cell.dataset.col,10);
+    const expected=target[r][c]; const val=(cell.value||'').toUpperCase();
+    if (val!==expected) correct=false;
+  });
+  if (correct) document.getElementById('next2').style.display='inline-block';
+}
+
+/* ---------- Puzzle 3 (single "Prime Time?" button) ---------- */
+let puzzle3Interval = null;
+const primesUnder60 = new Set([2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59]);
+
+function initPuzzle3(){
+  if (puzzle3Interval) clearInterval(puzzle3Interval);
+  updateClock(); puzzle3Interval = setInterval(updateClock,1000);
+  document.getElementById('next3').style.display='none';
+  const btn = document.getElementById('primeCheckBtn');
+  btn.onclick = checkPrimeTimeBoth;
+}
+
+function updateClock(){
+  const now = new Date();
+  const hh = now.getHours(), mm = now.getMinutes();
+  document.getElementById('hour-value').textContent = String(hh).padStart(2,'0');
+  document.getElementById('minute-value').textContent = String(mm).padStart(2,'0');
+}
+
+function checkPrimeTimeBoth(){
+  const hourText = document.getElementById('hour-value').textContent;
+  const minuteText = document.getElementById('minute-value').textContent;
+  const hh = parseInt(hourText,10), mm = parseInt(minuteText,10);
+  const messages = [];
+  if (!primesUnder60.has(hh)) messages.push(`${hourText} isn't prime`);
+  if (!primesUnder60.has(mm)) messages.push(`${minuteText} isn't prime`);
+  if (messages.length>0) {
+    alert(messages.join('\n'));
+  } else {
+    document.getElementById('next3').style.display='inline-block';
+  }
+}
+
+/* ---------- Puzzle 4: Connect Four (smart CPU with unfair double-first-move) ---------- */
+/* Implementation notes:
+   - Board rows = 6, cols = 7
+   - Player = 1 (human, yellow), CPU = 2 (red)
+   - CPU uses minimax + alpha-beta with depth limit and heuristic evaluation
+   - CPU always plays first
+   - On CPU's first turn, 1/3 chance of making two optimal moves (second move computed after first)
+*/
+let c4_board = null;
+let c4_rows = 6, c4_cols = 7;
+let c4_currentPlayer = 1; // 1=human, 2=cpu
+let c4_gameOver = false;
+let c4_cpuFirst = true; // CPU always starts
+let c4_firstCpuMoveDone = false; // tracks whether CPU has completed its first turn (for double-move chance)
+
+function initConnect4(){
+  // If already built, don't rebind unnecessarily
+  if (!document.getElementById('c4-board').dataset.inited) {
+    buildConnect4Board();
+    document.getElementById('c4-reset').addEventListener('click', ()=>startConnect4(true));
+    // removed CPU-first toggle binding intentionally per your request
+    document.getElementById('c4-board').dataset.inited = '1';
+  }
+  startConnect4(false);
+}
+
+function buildConnect4Board(){
+  const container = document.getElementById('c4-board');
+  container.innerHTML = '';
+  container.style.setProperty('grid-template-columns', `repeat(${c4_cols}, 56px)`);
+  // create 6*7 cells
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<c4_cols;c++){
+      const cell = document.createElement('div');
+      cell.className = 'c4-cell';
+      cell.dataset.col = c;
+      cell.dataset.row = r;
+      // clicking a cell acts as clicking its column (drop)
+      cell.addEventListener('click', ()=> {
+        if (c4_gameOver) return;
+        if (c4_currentPlayer !== 1) return;
+        playerDrop(parseInt(cell.dataset.col,10));
+      });
+      container.appendChild(cell);
     }
-    cpuFirstTurnDone = true;
-    renderBoard4();
-    if (checkWin4('CPU')) { gameOver4 = true; return; }
-    currentPlayer4 = 'Player';
+  }
 }
-function playerMove4(col) {
-    if (gameOver4 || currentPlayer4 !== 'Player') return;
-    if (!dropDisc4(col, 'Player')) return;
-    renderBoard4();
-    if (checkWin4('Player')) {
-        gameOver4 = true;
-        document.getElementById('next4').classList.remove('hidden');
+
+function startConnect4(skipCpu){
+  // initialize board: 6 rows x 7 cols filled with 0
+  c4_board = Array.from({length:c4_rows},()=>Array(c4_cols).fill(0));
+  c4_gameOver = false;
+  c4_firstCpuMoveDone = false;
+  // CPU always starts
+  c4_currentPlayer = c4_cpuFirst ? 2 : 1;
+  // hide next button at start
+  const next4 = document.getElementById('next4');
+  if (next4) next4.style.display = 'none';
+  // clear haha
+  const haha = document.getElementById('haha-msg');
+  if (haha) haha.textContent = '';
+  renderConnect4();
+  document.getElementById('c4-status').textContent = c4_currentPlayer===1 ? 'Your move.' : 'CPU thinking...';
+  if (c4_currentPlayer===2 && !skipCpu) {
+    setTimeout(cpuPlay, 300);
+  } else if (c4_currentPlayer===2 && skipCpu) {
+    setTimeout(cpuPlay, 300);
+  }
+}
+
+function renderConnect4(){
+  const container = document.getElementById('c4-board');
+  // cells are in row-major order (r0c0, r0c1...), but we want to show top->bottom
+  // We iterate over DOM children and set discs
+  const cells = container.children;
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<c4_cols;c++){
+      const idx = r*c4_cols + c;
+      const div = cells[idx];
+      div.innerHTML = ''; // clear
+      const val = c4_board[r][c];
+      if (val === 1) {
+        const d = document.createElement('div'); d.className='disc player'; div.appendChild(d);
+      } else if (val === 2) {
+        const d = document.createElement('div'); d.className='disc cpu'; div.appendChild(d);
+      }
+    }
+  }
+}
+
+function playerDrop(col){
+  if (c4_gameOver) return;
+  const row = firstEmptyRow(col);
+  if (row === -1) return; // column full
+  c4_board[row][col] = 1;
+  renderConnect4();
+  if (checkWinBoard(c4_board, 1)) {
+    c4_gameOver = true;
+    document.getElementById('c4-status').textContent = 'You win!';
+    // show Next button after player wins
+    const next4 = document.getElementById('next4');
+    if (next4) next4.style.display = 'inline-block';
+    return;
+  }
+  if (isBoardFull(c4_board)) {
+    c4_gameOver = true;
+    document.getElementById('c4-status').textContent = 'Tie!';
+    return;
+  }
+  c4_currentPlayer = 2;
+  document.getElementById('c4-status').textContent = 'CPU thinking...';
+  setTimeout(cpuPlay, 250);
+}
+
+function firstEmptyRow(col){
+  // bottom-most empty (highest index row)
+  for (let r=c4_rows-1;r>=0;r--){
+    if (c4_board[r][col] === 0) return r;
+  }
+  return -1;
+}
+
+function cpuPlay(){
+  if (c4_gameOver) return;
+  // choose move via minimax with alpha-beta
+  const depth = 5; // depth limit (reasonable compromise)
+  let [score, bestCol] = c4_minimaxRoot(c4_board, depth);
+  if (bestCol === null) {
+    // fallback: first available
+    for (let c=0;c<c4_cols;c++){
+      if (firstEmptyRow(c) !== -1) { bestCol = c; break; }
+    }
+  }
+  if (bestCol !== null) {
+    const row = firstEmptyRow(bestCol);
+    if (row !== -1) {
+      c4_board[row][bestCol] = 2;
+      renderConnect4();
+      if (checkWinBoard(c4_board, 2)) {
+        c4_gameOver = true;
+        document.getElementById('c4-status').textContent = 'CPU wins.';
         return;
+      }
+      if (isBoardFull(c4_board)) {
+        c4_gameOver = true;
+        document.getElementById('c4-status').textContent = 'Tie!';
+        return;
+      }
     }
-    currentPlayer4 = 'CPU';
-    cpuMove4();
-}
-function checkWin4(player) {
-    // check horizontal, vertical, diagonal
-    for (let r=0;r<ROWS;r++) {
-        for (let c=0;c<COLS;c++) {
-            if (c+3<COLS && [0,1,2,3].every(i=>board4[r][c+i]===player)) return true;
-            if (r+3<ROWS && [0,1,2,3].every(i=>board4[r+i][c]===player)) return true;
-            if (c+3<COLS && r+3<ROWS && [0,1,2,3].every(i=>board4[r+i][c+i]===player)) return true;
-            if (c-3>=0 && r+3<ROWS && [0,1,2,3].every(i=>board4[r+i][c-i]===player)) return true;
+  }
+
+  /* --- Unfair double-move logic on CPU's first turn --- */
+  if (!c4_firstCpuMoveDone) {
+    c4_firstCpuMoveDone = true;
+    // 1/3 chance to make a second strategic move immediately
+    if (Math.random() < (1/3)) {
+      // compute second optimal move now
+      let [score2, bestCol2] = c4_minimaxRoot(c4_board, depth);
+      if (bestCol2 === null) {
+        for (let c=0;c<c4_cols;c++){
+          if (firstEmptyRow(c) !== -1) { bestCol2 = c; break; }
         }
+      }
+      if (bestCol2 !== null) {
+        const row2 = firstEmptyRow(bestCol2);
+        if (row2 !== -1) {
+          c4_board[row2][bestCol2] = 2;
+          renderConnect4();
+          // show "haha" briefly under reset per your request
+          const haha = document.getElementById('haha-msg');
+          if (haha) {
+            haha.textContent = 'haha';
+            setTimeout(()=>{ haha.textContent = ''; }, 1000);
+          }
+          if (checkWinBoard(c4_board, 2)) {
+            c4_gameOver = true;
+            document.getElementById('c4-status').textContent = 'CPU wins.';
+            return;
+          }
+          if (isBoardFull(c4_board)) {
+            c4_gameOver = true;
+            document.getElementById('c4-status').textContent = 'Tie!';
+            return;
+          }
+        }
+      }
     }
-    return false;
+  }
+
+  c4_currentPlayer = 1;
+  document.getElementById('c4-status').textContent = 'Your move.';
 }
-document.getElementById('reset4').addEventListener('click', initConnect4);
 
-/* Init first boards when sections load */
-initConnect4();
-</script>
+/* ---------- Connect4 helpers: win detection, evaluation, minimax ---------- */
 
-</body>
-</html>
+function checkWinBoard(board, player){
+  // check horizontal, vertical, diag
+  // horizontal
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      if (board[r][c]===player && board[r][c+1]===player && board[r][c+2]===player && board[r][c+3]===player) return true;
+    }
+  }
+  // vertical
+  for (let c=0;c<c4_cols;c++){
+    for (let r=0;r<=c4_rows-4;r++){
+      if (board[r][c]===player && board[r+1][c]===player && board[r+2][c]===player && board[r+3][c]===player) return true;
+    }
+  }
+  // diag down-right
+  for (let r=0;r<=c4_rows-4;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      if (board[r][c]===player && board[r+1][c+1]===player && board[r+2][c+2]===player && board[r+3][c+3]===player) return true;
+    }
+  }
+  // diag up-right
+  for (let r=3;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      if (board[r][c]===player && board[r-1][c+1]===player && board[r-2][c+2]===player && board[r-3][c+3]===player) return true;
+    }
+  }
+  return false;
+}
+
+function isBoardFull(board){
+  for (let c=0;c<c4_cols;c++) if (firstEmptyRow(c) !== -1) return false;
+  return true;
+}
+
+/* Simple heuristic evaluation:
+   - Score center column occupancy.
+   - Score runs of 2/3 for CPU and subtract for player.
+*/
+function evaluateBoard(board){
+  let score = 0;
+  // center column preference for CPU
+  const centerCol = Math.floor(c4_cols/2);
+  for (let r=0;r<c4_rows;r++){
+    if (board[r][centerCol] === 2) score += 3;
+    else if (board[r][centerCol] === 1) score -= 3;
+  }
+  // evaluate all windows of length 4
+  function evaluateWindow(windowArr){
+    const cpuCount = windowArr.filter(x=>x===2).length;
+    const playerCount = windowArr.filter(x=>x===1).length;
+    const emptyCount = windowArr.filter(x=>x===0).length;
+    let s = 0;
+    if (cpuCount === 4) s += 1000;
+    else if (cpuCount === 3 && emptyCount ===1) s += 50;
+    else if (cpuCount === 2 && emptyCount ===2) s += 10;
+    if (playerCount === 3 && emptyCount ===1) s -= 80;
+    else if (playerCount === 2 && emptyCount ===2) s -= 8;
+    return s;
+  }
+  // horizontal
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      const windowArr = [board[r][c], board[r][c+1], board[r][c+2], board[r][c+3]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  // vertical
+  for (let c=0;c<c4_cols;c++){
+    for (let r=0;r<=c4_rows-4;r++){
+      const windowArr = [board[r][c], board[r+1][c], board[r+2][c], board[r+3][c]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  // diag down-right
+  for (let r=0;r<=c4_rows-4;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      const windowArr = [board[r][c], board[r+1][c+1], board[r+2][c+2], board[r+3][c+3]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  // diag up-right
+  for (let r=3;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      const windowArr = [board[r][c], board[r-1][c+1], board[r-2][c+2], board[r-3][c+3]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  return score;
+}
+
+/* Generate list of valid columns (not full) */
+function validColumns(board){
+  const cols = [];
+  for (let c=0;c<c4_cols;c++) if (board[0][c] === 0) cols.push(c);
+  return cols;
+}
+
+/* copy board */
+function copyBoard(board){
+  return board.map(row => row.slice());
