@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8" />
 <title>Puzzle Challenge</title>
 <style>
-  /* Base */
+  /* Base + site-wide styles — kept from your working version */
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html,body { height:100%; }
   body {
     background-color: #121212;
     color: #ffffff;
@@ -16,24 +16,18 @@
     padding: 0;
   }
 
-  /* Sections */
   .puzzle-section { display: none; margin-top: 20px; }
-  #code-entry { display: block; }
 
-  /* Code entry */
+  /* Code entry (locked-in look) */
   .code-input {
     width: 40px; height: 40px;
-    text-align: center;
-    font-size: 24px;
-    margin: 5px;
-    background: #1e1e1e !important;
-    color: #fff !important;
-    border: 1px solid #333 !important;
-    outline: none;
+    text-align: center; font-size: 24px; margin: 5px;
+    background: #1e1e1e !important; color: #fff !important;
+    border: 1px solid #333 !important; outline: none;
     text-transform: uppercase;
   }
 
-  /* Puzzle 1 (Tic-tac-toe with secret ring) */
+  /* Puzzle1: tic-tac-toe / outer ring (kept) */
   .outer-ring {
     display: grid;
     grid-template-columns: repeat(5, 60px);
@@ -42,108 +36,42 @@
     justify-content: center;
     justify-items: center;
   }
-  .outer-cell {
-    width: 60px; height: 60px;
-    background-color: transparent;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px;
-    cursor: pointer; user-select: none;
-    border: none;
-  }
-  .cell {
-    width: 60px; height: 60px; /* inner 3x3 visible cells */
-    background-color: #1e1e1e;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px; user-select: none;
-  }
-  .outer-cell.visibleO { background-color: #1e1e1e; color: #fff; }
-  #result { font-size: 24px; margin-top: 12px; min-height: 28px; }
-  button { margin-top: 12px; padding: 10px 20px; font-size: 16px; }
+  .outer-cell { width:60px; height:60px; background:transparent; display:flex; align-items:center; justify-content:center; font-size:32px; cursor:pointer; user-select:none; border:none; }
+  .cell { width:60px; height:60px; background:#1e1e1e; display:flex; align-items:center; justify-content:center; font-size:32px; }
+  .outer-cell.visibleO { background:#1e1e1e; color:#fff; }
 
-  /* Puzzle 2 (Crossword) */
-  #puzzle2 .crossword {
-    border-collapse: collapse;
-    table-layout: fixed;
-    margin: 60px auto 12px auto; /* space above for readability */
-  }
-  #puzzle2 .crossword td {
-    position: relative;
-    width: 40px; height: 40px;
-    border: 1px solid #444 !important; /* force vertical lines too */
-    padding: 0;
-    background: #111;
-  }
-  #puzzle2 .crossword td.black { background: #000 !important; }
-  #puzzle2 .cw-cell {
-    width: 100%; height: 100%;
-    border: none; outline: none;
-    text-align: center;
-    font-size: 20px;
-    color: #000 !important;
-    background: #fff !important;
-    text-transform: uppercase;
-    display: block;
-  }
-  #puzzle2 .cw-num {
-    position: absolute;
-    top: 2px; left: 2px;
-    font-size: 10px; color: #000;
-    z-index: 2; pointer-events: none;
-  }
-  #crossword-wrapper {
-    display: flex; flex-direction: column; align-items: center;
-    width: 100%;
-  }
-  #crossword-clues {
-    text-align: left;
-    max-width: 600px;
-    margin: 8px auto 24px auto;
-    color: white;
-  }
+  #result { font-size:24px; margin-top:12px; min-height:28px; }
+  button { margin-top:12px; padding:10px 20px; font-size:16px; }
 
-  /* Puzzle 3 (Clock) - keep scoped to puzzle3 so other styling unaffected */
-  #puzzle3 .clock-wrapper {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-  #puzzle3 .clock {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: inherit;
-    color: white;
-    font-size: 48px;
-    letter-spacing: 2px;
-  }
-  #puzzle3 .half {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 90px;
-  }
-  #puzzle3 .half .value {
-    background: #1e1e1e;
-    padding: 8px 16px;
-    border-radius: 6px;
-    min-width: 60px;
-    text-align: center;
-    font-size: 40px;
-    color: white;
-    box-shadow: none;
-  }
-  #puzzle3 .prime-btn {
-    margin-top: 8px;
-    padding: 8px 12px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  #puzzle3 #next3 {
-    display: none;
-    margin-top: 8px;
-  }
+  /* Puzzle2 crossword (kept and scoped) */
+  #puzzle2 .crossword { border-collapse:collapse; table-layout:fixed; margin:60px auto 12px auto; }
+  #puzzle2 .crossword td { position:relative; width:40px; height:40px; border:1px solid #444 !important; padding:0; background:#111; }
+  #puzzle2 .crossword td.black { background:#000 !important; }
+  #puzzle2 .cw-cell { width:100%; height:100%; border:none; outline:none; text-align:center; font-size:20px; color:#000 !important; background:#fff !important; text-transform:uppercase; display:block; }
+  #puzzle2 .cw-num { position:absolute; top:2px; left:2px; font-size:10px; color:#000; z-index:2; pointer-events:none; }
+  #crossword-wrapper { display:flex; flex-direction:column; align-items:center; width:100%; }
+  #crossword-clues { text-align:left; max-width:600px; margin:8px auto 24px auto; color:white; }
+
+  /* Puzzle3 clock (scoped to puzzle3) */
+  #puzzle3 .clock-wrapper { margin-top:30px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #puzzle3 .clock { display:flex; align-items:center; gap:12px; font-family:inherit; color:white; font-size:48px; letter-spacing:2px; }
+  #puzzle3 .half { display:flex; flex-direction:column; align-items:center; min-width:90px; }
+  #puzzle3 .half .value { background:#1e1e1e; padding:8px 16px; border-radius:6px; min-width:60px; text-align:center; font-size:40px; color:white; }
+  #puzzle3 .prime-btn { margin-top:8px; padding:8px 12px; font-size:14px; cursor:pointer; }
+  #puzzle3 #next3 { display:none; margin-top:8px; }
+
+  /* Puzzle4 Connect Four (scoped) */
+  #puzzle4 .c4-wrapper { margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #puzzle4 .c4-board { display:grid; grid-template-columns: repeat(7, 56px); grid-gap:6px; background:transparent; padding:6px; }
+  #puzzle4 .c4-cell { width:56px; height:56px; background:#111; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
+  #puzzle4 .disc { width:44px; height:44px; border-radius:50%; background:transparent; box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset; }
+  #puzzle4 .disc.player { background: #ffd54f; }   /* player color (O-ish) */
+  #puzzle4 .disc.cpu { background: #ff6b6b; }      /* cpu color (X-ish) */
+  #puzzle4 .c4-controls { display:flex; gap:8px; align-items:center; }
+  #c4-status { margin-top:8px; min-height:24px; }
+  #c4-reset { margin-left:8px; }
+  /* pointer-none when disabled */
+  .disabled { pointer-events: none; opacity: 0.7; }
 </style>
 </head>
 <body>
@@ -201,37 +129,43 @@
     <div class="clock" id="clock">
       <div class="half" id="hour-half">
         <div class="value" id="hour-value">00</div>
-        <button class="prime-btn" id="primeHourBtn">Prime Time?</button>
       </div>
 
       <div style="font-size:40px;color:white;opacity:0.9;">:</div>
 
       <div class="half" id="minute-half">
         <div class="value" id="minute-value">00</div>
-        <button class="prime-btn" id="primeMinuteBtn">Prime Time?</button>
       </div>
     </div>
 
+    <button id="primeCheckBtn" class="prime-btn">Prime Time?</button>
     <button id="next3" onclick="showSection('puzzle4')">Next</button>
   </div>
 </div>
 
-<!-- Puzzle 4 placeholder -->
+<!-- Puzzle 4: Connect Four -->
 <div id="puzzle4" class="puzzle-section">
-  <h1>Puzzle 4 (placeholder)</h1>
-  <p>This is a placeholder for Puzzle 4.</p>
+  <h1>Puzzle 4 — Connect 4</h1>
+  <div class="c4-wrapper">
+    <div id="c4-status">Your move.</div>
+    <div id="c4-board" class="c4-board" aria-label="Connect Four board"></div>
+    <div class="c4-controls">
+      <button id="c4-reset">Reset</button>
+      <button id="c4-auto" title="Toggle CPU goes first">CPU First: Off</button>
+    </div>
+  </div>
 </div>
 
 <script>
-/* Section switching */
+/* ---------- Section switching / code entry (unchanged behaviour) ---------- */
 function showSection(id) {
   document.querySelectorAll('.puzzle-section').forEach(sec => sec.style.display = 'none');
   const el = document.getElementById(id);
   el.style.display = 'block';
-  // start/init hooks
   if (id === 'puzzle1') startPuzzle1();
   if (id === 'puzzle2') buildCrossword();
   if (id === 'puzzle3') initPuzzle3();
+  if (id === 'puzzle4') initConnect4();
 }
 
 /* Code entry */
@@ -240,41 +174,37 @@ codeInputs.forEach((input, index) => {
   input.addEventListener('input', () => {
     input.value = input.value.toUpperCase();
     if (input.value.length === 1 && index < codeInputs.length - 1) {
-      codeInputs[index + 1].focus();
+      codeInputs[index+1].focus();
     }
     checkCode();
   });
 });
-function checkCode() {
-  const code = Array.from(codeInputs).map(inp => inp.value.toUpperCase()).join('');
+function checkCode(){
+  const code = Array.from(codeInputs).map(i=>i.value.toUpperCase()).join('');
   if (code === 'JONES') {
     showSection('puzzle1');
   }
 }
 
-/* --- Puzzle 1 logic (unchanged) --- */
+/* ---------- Puzzle 1 (kept as before) ---------- */
 let outerRing = [];
 let gameActive = true;
-
-// Inner 3x3 mapping within the 5x5 board (row-major indices 0..24)
 const innerToOuter = [6,7,8,11,12,13,16,17,18];
 const winsOuter = [
   [6,7,8],[11,12,13],[16,17,18],
   [6,11,16],[7,12,17],[8,13,18],
   [6,12,18],[8,12,16]
 ];
-// extendedTriplets copied from previous working config
 const extendedTriplets = [
-  [5,6,7], [7,8,9],
-  [10,11,12], [12,13,14],
-  [15,16,17], [17,18,19],
-  [1,6,11], [11,16,21],
-  [2,7,12], [12,17,22],
-  [3,8,13], [13,18,23],
-  [0,6,12], [12,18,24],
-  [4,8,12], [12,16,20]
+  [5,6,7],[7,8,9],
+  [10,11,12],[12,13,14],
+  [15,16,17],[17,18,19],
+  [1,6,11],[11,16,21],
+  [2,7,12],[12,17,22],
+  [3,8,13],[13,18,23],
+  [0,6,12],[12,18,24],
+  [4,8,12],[12,16,20]
 ];
-
 function startPuzzle1() {
   const outerRingContainer = document.getElementById('outer-ring');
   outerRingContainer.innerHTML = '';
@@ -282,181 +212,84 @@ function startPuzzle1() {
   outerRing = Array(25).fill(null);
   document.getElementById('result').textContent = '';
   document.getElementById('next1').style.display = 'none';
-
-  // Build 5x5, attach handlers to cells
-  for (let i = 0; i < 25; i++) {
+  for (let i=0;i<25;i++){
     const cell = document.createElement('div');
     cell.classList.add('outer-cell');
     if (innerToOuter.includes(i)) {
-      cell.classList.add('cell'); // inner 3x3 visible squares
-      cell.addEventListener('click', () => handlePlayerMove(i));
+      cell.classList.add('cell');
+      cell.addEventListener('click', ()=>handlePlayerMove(i));
     } else {
-      // Outer ring: only works AFTER the game ends (lose or tie)
-      cell.addEventListener('click', () => handleOuterClick(i));
+      cell.addEventListener('click', ()=>handleOuterClick(i));
     }
     outerRingContainer.appendChild(cell);
   }
-
-  cpuMove(); // CPU opens in the center
+  cpuMove();
 }
-
-function getInnerBoard() {
-  return innerToOuter.map(i => outerRing[i]);
-}
-function innerEmpty(b) {
-  return b.every(v => v === null);
-}
-function winner3(b) {
-  const lines = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
-  ];
-  for (const [a,b2,c] of lines) {
-    if (b[a] && b[a] === b[b2] && b[a] === b[c]) return b[a];
-  }
-  if (b.every(x => x !== null)) return 'tie';
+function getInnerBoard(){ return innerToOuter.map(i=>outerRing[i]); }
+function innerEmpty(b){ return b.every(v=>v===null); }
+function winner3(b){ 
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (const [a,b2,c] of lines) if (b[a] && b[a]===b[b2] && b[a]===b[c]) return b[a];
+  if (b.every(x=>x!==null)) return 'tie';
   return null;
 }
-function minimax(b, isMax, depth=0) {
+function minimax(b,isMax,depth=0){
   const w = winner3(b);
-  if (w === 'X') return 10 - depth;
-  if (w === 'O') return depth - 10;
-  if (w === 'tie') return 0;
-  if (isMax) {
-    let best = -Infinity;
-    for (let i=0;i<9;i++) {
-      if (b[i] === null) {
-        b[i] = 'X';
-        best = Math.max(best, minimax(b, false, depth+1));
-        b[i] = null;
-      }
-    }
+  if (w==='X') return 10-depth;
+  if (w==='O') return depth-10;
+  if (w==='tie') return 0;
+  if (isMax){
+    let best=-Infinity;
+    for (let i=0;i<9;i++) if (b[i]===null){ b[i]='X'; best=Math.max(best, minimax(b,false,depth+1)); b[i]=null; }
     return best;
   } else {
-    let best = Infinity;
-    for (let i=0;i<9;i++) {
-      if (b[i] === null) {
-        b[i] = 'O';
-        best = Math.min(best, minimax(b, true, depth+1));
-        b[i] = null;
-      }
-    }
+    let best=Infinity;
+    for (let i=0;i<9;i++) if (b[i]===null){ b[i]='O'; best=Math.min(best, minimax(b,true,depth+1)); b[i]=null; }
     return best;
   }
 }
-function cpuMove() {
+function cpuMove(){
   if (!gameActive) return;
   const b = getInnerBoard();
-  // First move center
-  if (innerEmpty(b) && outerRing[12] === null) {
-    makeMove(12, 'X');
-    return;
+  if (innerEmpty(b) && outerRing[12]===null) { makeMove(12,'X'); return; }
+  let best=-Infinity, bestInner=null;
+  for (let i=0;i<9;i++) if (b[i]===null){
+    b[i]='X';
+    const score = minimax(b,false,0);
+    b[i]=null;
+    if (score>best){ best=score; bestInner=i; }
   }
-  // Minimax follow-ups
-  let best = -Infinity;
-  let bestInner = null;
-  for (let i=0;i<9;i++) {
-    if (b[i] === null) {
-      b[i] = 'X';
-      const score = minimax(b, false, 0);
-      b[i] = null;
-      if (score > best) {
-        best = score;
-        bestInner = i;
-      }
-    }
-  }
-  if (bestInner !== null) {
-    const outerIdx = innerToOuter[bestInner];
-    makeMove(outerIdx, 'X');
-  }
+  if (bestInner!==null) makeMove(innerToOuter[bestInner],'X');
 }
-function makeMove(index, player) {
+function makeMove(index,player){
   const cell = document.getElementById('outer-ring').children[index];
-  if (!cell || outerRing[index] !== null) return;
+  if (!cell || outerRing[index]!==null) return;
   cell.textContent = player;
-  if (player === 'O') cell.classList.add('visibleO');
-  outerRing[index] = player;
-  if (innerToOuter.includes(index)) {
-    if (isWinInner(player)) {
-      document.getElementById('result').textContent = (player === 'O') ? 'You Win!' : 'You Lose!';
-      gameActive = false;
-      if (player === 'O') document.getElementById('next1').style.display = 'block';
-      return;
-    }
-    if (isTieInner()) {
-      document.getElementById('result').textContent = 'Tie!';
-      gameActive = false;
-      return;
-    }
+  if (player==='O') cell.classList.add('visibleO');
+  outerRing[index]=player;
+  if (innerToOuter.includes(index)){
+    if (isWinInner(player)){ document.getElementById('result').textContent = player==='O' ? 'You Win!' : 'You Lose!'; gameActive=false; if (player==='O') document.getElementById('next1').style.display='block'; return; }
+    if (isTieInner()){ document.getElementById('result').textContent='Tie!'; gameActive=false; return; }
   }
 }
-function handlePlayerMove(index) {
-  if (!gameActive) return;
-  if (outerRing[index] !== null) return;
-  makeMove(index, 'O');
-  if (gameActive) cpuMove();
-}
-function handleOuterClick(index) {
-  if (gameActive) return;                 // Not allowed until the game ends
-  if (innerToOuter.includes(index)) return;
-  if (outerRing[index] !== null) return;
-  makeMove(index, 'O'); // visible O placed on the outer ring
-  if (isExtendedWinO()) {
-    document.getElementById('result').textContent = 'You Win!';
-    document.getElementById('next1').style.display = 'block';
-  }
-}
-function isWinInner(player) {
-  return winsOuter.some(line => line.every(i => outerRing[i] === player));
-}
-function isTieInner() {
-  return innerToOuter.every(i => outerRing[i] !== null);
-}
-function isExtendedWinO() {
-  return extendedTriplets.some(tri => tri.every(i => outerRing[i] === 'O'));
-}
+function handlePlayerMove(index){ if (!gameActive) return; if (outerRing[index]!==null) return; makeMove(index,'O'); if (gameActive) cpuMove(); }
+function handleOuterClick(index){ if (gameActive) return; if (innerToOuter.includes(index)) return; if (outerRing[index]!==null) return; makeMove(index,'O'); if (isExtendedWinO()){ document.getElementById('result').textContent='You Win!'; document.getElementById('next1').style.display='block'; } }
+function isWinInner(player){ return winsOuter.some(line=>line.every(i=>outerRing[i]===player)); }
+function isTieInner(){ return innerToOuter.every(i=>outerRing[i]!==null); }
+function isExtendedWinO(){ return extendedTriplets.some(tri=>tri.every(i=>outerRing[i]==='O')); }
 document.getElementById('reset-btn').addEventListener('click', startPuzzle1);
 
-/* --- Puzzle 2 (Crossword) --- */
-function buildCrossword() {
+/* ---------- Puzzle 2 (crossword) ---------- */
+function buildCrossword(){
   const container = document.getElementById('crossword-container');
-  container.innerHTML = '';
-  const grid = [
-    ['B','E','L','K','S'],
-    ['E','*','O','N','E'],
-    ['L','O','G','*','N'],
-    ['T','H','I','R','D'],
-    ['S','O','C','K','S']
-  ];
-  const numbers = {
-    '0,0':1,'0,2':2,'0,3':3,'0,4':4,
-    '1,2':5,'2,0':6,'2,1':7,'3,0':8,
-    '3,3':9,'4,0':10
-  };
-  const table = document.createElement('table');
-  table.className = 'crossword';
-  for (let r=0;r<5;r++) {
-    const tr = document.createElement('tr');
-    for (let c=0;c<5;c++) {
-      const td = document.createElement('td');
-      if (grid[r][c] === '*') {
-        td.classList.add('black');
-      } else {
-        const input = document.createElement('input');
-        input.maxLength = 1;
-        input.className = 'cw-cell';
-        input.dataset.row = r;
-        input.dataset.col = c;
-        td.appendChild(input);
-      }
-      if (numbers[`${r},${c}`]) {
-        const num = document.createElement('span');
-        num.className = 'cw-num';
-        num.textContent = numbers[`${r},${c}`];
-        td.appendChild(num);
-      }
+  container.innerHTML='';
+  const grid=[['B','E','L','K','S'],['E','*','O','N','E'],['L','O','G','*','N'],['T','H','I','R','D'],['S','O','C','K','S']];
+  const numbers={'0,0':1,'0,2':2,'0,3':3,'0,4':4,'1,2':5,'2,0':6,'2,1':7,'3,0':8,'3,3':9,'4,0':10};
+  const table=document.createElement('table'); table.className='crossword';
+  for (let r=0;r<5;r++){ const tr=document.createElement('tr');
+    for (let c=0;c<5;c++){ const td=document.createElement('td');
+      if (grid[r][c]==='*') td.classList.add('black'); else { const input=document.createElement('input'); input.maxLength=1; input.className='cw-cell'; input.dataset.row=r; input.dataset.col=c; td.appendChild(input); }
+      if (numbers[`${r},${c}`]){ const num=document.createElement('span'); num.className='cw-num'; num.textContent=numbers[`${r},${c}`]; td.appendChild(num); }
       tr.appendChild(td);
     }
     table.appendChild(tr);
@@ -464,73 +297,355 @@ function buildCrossword() {
   container.appendChild(table);
   container.addEventListener('input', checkCrossword);
 }
-function checkCrossword() {
-  const target = [
-    ['B','E','L','K','S'],
-    ['E','','O','N','E'],
-    ['L','O','G','','N'],
-    ['T','H','I','R','D'],
-    ['S','O','C','K','S']
-  ];
-  let correct = true;
-  document.querySelectorAll('#crossword-container .cw-cell').forEach(cell => {
-    const r = parseInt(cell.dataset.row, 10);
-    const c = parseInt(cell.dataset.col, 10);
-    const expected = target[r][c];
-    const val = (cell.value || '').toUpperCase();
-    if (val !== expected) correct = false;
+function checkCrossword(){
+  const target=[['B','E','L','K','S'],['E','','O','N','E'],['L','O','G','','N'],['T','H','I','R','D'],['S','O','C','K','S']];
+  let correct=true;
+  document.querySelectorAll('#crossword-container .cw-cell').forEach(cell=>{
+    const r=parseInt(cell.dataset.row,10), c=parseInt(cell.dataset.col,10);
+    const expected=target[r][c]; const val=(cell.value||'').toUpperCase();
+    if (val!==expected) correct=false;
   });
-  if (correct) {
-    document.getElementById('next2').style.display = 'inline-block';
-  }
+  if (correct) document.getElementById('next2').style.display='inline-block';
 }
 
-/* --- Puzzle 3 (Clock + Prime check) --- */
+/* ---------- Puzzle 3 (single "Prime Time?" button) ---------- */
 let puzzle3Interval = null;
 const primesUnder60 = new Set([2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59]);
 
-function initPuzzle3() {
-  // clear any previous interval (if returning)
+function initPuzzle3(){
   if (puzzle3Interval) clearInterval(puzzle3Interval);
-  updateClock(); // initial
-  puzzle3Interval = setInterval(updateClock, 1000);
-
-  // ensure next button hidden on entry
-  document.getElementById('next3').style.display = 'none';
-
-  // attach handlers (idempotent)
-  document.getElementById('primeHourBtn').onclick = checkPrimeTime;
-  document.getElementById('primeMinuteBtn').onclick = checkPrimeTime;
+  updateClock(); puzzle3Interval = setInterval(updateClock,1000);
+  document.getElementById('next3').style.display='none';
+  const btn = document.getElementById('primeCheckBtn');
+  btn.onclick = checkPrimeTimeBoth;
 }
 
-function updateClock() {
+function updateClock(){
   const now = new Date();
-  const hh = now.getHours();
-  const mm = now.getMinutes();
-  const hhStr = String(hh).padStart(2,'0');
-  const mmStr = String(mm).padStart(2,'0');
-  document.getElementById('hour-value').textContent = hhStr;
-  document.getElementById('minute-value').textContent = mmStr;
+  const hh = now.getHours(), mm = now.getMinutes();
+  document.getElementById('hour-value').textContent = String(hh).padStart(2,'0');
+  document.getElementById('minute-value').textContent = String(mm).padStart(2,'0');
 }
 
-function checkPrimeTime() {
+function checkPrimeTimeBoth(){
   const hourText = document.getElementById('hour-value').textContent;
   const minuteText = document.getElementById('minute-value').textContent;
-  const hh = parseInt(hourText, 10);
-  const mm = parseInt(minuteText, 10);
-
+  const hh = parseInt(hourText,10), mm = parseInt(minuteText,10);
   const messages = [];
   if (!primesUnder60.has(hh)) messages.push(`${hourText} isn't prime`);
   if (!primesUnder60.has(mm)) messages.push(`${minuteText} isn't prime`);
-
-  if (messages.length > 0) {
+  if (messages.length>0) {
     alert(messages.join('\n'));
   } else {
-    // both prime -> reveal Next button
-    document.getElementById('next3').style.display = 'inline-block';
+    document.getElementById('next3').style.display='inline-block';
+  }
+}
+
+/* ---------- Puzzle 4: Connect Four (smart CPU) ---------- */
+/* Implementation notes:
+   - Board rows = 6, cols = 7
+   - Player = 1 (human, yellow), CPU = 2 (red)
+   - CPU uses minimax + alpha-beta with depth limit and heuristic evaluation
+*/
+let c4_board = null;
+let c4_rows = 6, c4_cols = 7;
+let c4_currentPlayer = 1; // 1=human, 2=cpu
+let c4_gameOver = false;
+let c4_cpuFirst = false;
+
+function initConnect4(){
+  // If already built, don't rebind unnecessarily
+  if (!document.getElementById('c4-board').dataset.inited) {
+    buildConnect4Board();
+    document.getElementById('c4-reset').addEventListener('click', ()=>startConnect4(true));
+    document.getElementById('c4-auto').addEventListener('click', toggleCpuFirst);
+    document.getElementById('c4-board').dataset.inited = '1';
+  }
+  startConnect4(false);
+}
+
+function toggleCpuFirst(){
+  c4_cpuFirst = !c4_cpuFirst;
+  document.getElementById('c4-auto').textContent = `CPU First: ${c4_cpuFirst ? 'On' : 'Off'}`;
+  startConnect4(true);
+}
+
+function buildConnect4Board(){
+  const container = document.getElementById('c4-board');
+  container.innerHTML = '';
+  container.style.setProperty('grid-template-columns', `repeat(${c4_cols}, 56px)`);
+  // create 6*7 cells
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<c4_cols;c++){
+      const cell = document.createElement('div');
+      cell.className = 'c4-cell';
+      cell.dataset.col = c;
+      cell.dataset.row = r;
+      // clicking a cell acts as clicking its column (drop)
+      cell.addEventListener('click', ()=> {
+        if (c4_gameOver) return;
+        if (c4_currentPlayer !== 1) return;
+        playerDrop(parseInt(cell.dataset.col,10));
+      });
+      container.appendChild(cell);
+    }
+  }
+}
+
+function startConnect4(skipCpu){
+  // initialize board: 6 rows x 7 cols filled with 0
+  c4_board = Array.from({length:c4_rows},()=>Array(c4_cols).fill(0));
+  c4_gameOver = false;
+  // default human starts unless cpuFirst true
+  c4_currentPlayer = c4_cpuFirst ? 2 : 1;
+  renderConnect4();
+  document.getElementById('c4-status').textContent = c4_currentPlayer===1 ? 'Your move.' : 'CPU thinking...';
+  if (c4_currentPlayer===2 && !skipCpu) {
+    setTimeout(cpuPlay, 300);
+  } else if (c4_currentPlayer===2 && skipCpu) {
+    // if skipCpu true (e.g. toggled), let CPU move immediately after short delay
+    setTimeout(cpuPlay, 300);
+  }
+}
+
+function renderConnect4(){
+  const container = document.getElementById('c4-board');
+  // cells are in row-major order (r0c0, r0c1...), but we want to show top->bottom
+  // We iterate over DOM children and set discs
+  const cells = container.children;
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<c4_cols;c++){
+      const idx = r*c4_cols + c;
+      const div = cells[idx];
+      div.innerHTML = ''; // clear
+      const val = c4_board[r][c];
+      if (val === 1) {
+        const d = document.createElement('div'); d.className='disc player'; div.appendChild(d);
+      } else if (val === 2) {
+        const d = document.createElement('div'); d.className='disc cpu'; div.appendChild(d);
+      }
+    }
+  }
+}
+
+function playerDrop(col){
+  if (c4_gameOver) return;
+  const row = firstEmptyRow(col);
+  if (row === -1) return; // column full
+  c4_board[row][col] = 1;
+  renderConnect4();
+  if (checkWinBoard(c4_board, 1)) {
+    c4_gameOver = true;
+    document.getElementById('c4-status').textContent = 'You win!';
+    return;
+  }
+  if (isBoardFull(c4_board)) {
+    c4_gameOver = true;
+    document.getElementById('c4-status').textContent = 'Tie!';
+    return;
+  }
+  c4_currentPlayer = 2;
+  document.getElementById('c4-status').textContent = 'CPU thinking...';
+  setTimeout(cpuPlay, 250);
+}
+
+function firstEmptyRow(col){
+  // bottom-most empty (highest index row)
+  for (let r=c4_rows-1;r>=0;r--){
+    if (c4_board[r][col] === 0) return r;
+  }
+  return -1;
+}
+
+function cpuPlay(){
+  if (c4_gameOver) return;
+  // choose move via minimax with alpha-beta
+  const depth = 5; // depth limit (reasonable compromise)
+  const [score, bestCol] = c4_minimaxRoot(c4_board, depth);
+  if (bestCol === null) {
+    // fallback: first available
+    for (let c=0;c<c4_cols;c++){
+      if (firstEmptyRow(c) !== -1) { bestCol = c; break; }
+    }
+  }
+  if (bestCol !== null) {
+    const row = firstEmptyRow(bestCol);
+    if (row !== -1) {
+      c4_board[row][bestCol] = 2;
+      renderConnect4();
+      if (checkWinBoard(c4_board, 2)) {
+        c4_gameOver = true;
+        document.getElementById('c4-status').textContent = 'CPU wins.';
+        return;
+      }
+      if (isBoardFull(c4_board)) {
+        c4_gameOver = true;
+        document.getElementById('c4-status').textContent = 'Tie!';
+        return;
+      }
+    }
+  }
+  c4_currentPlayer = 1;
+  document.getElementById('c4-status').textContent = 'Your move.';
+}
+
+/* ---------- Connect4 helpers: win detection, evaluation, minimax ---------- */
+
+function checkWinBoard(board, player){
+  // check horizontal, vertical, diag
+  // horizontal
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      if (board[r][c]===player && board[r][c+1]===player && board[r][c+2]===player && board[r][c+3]===player) return true;
+    }
+  }
+  // vertical
+  for (let c=0;c<c4_cols;c++){
+    for (let r=0;r<=c4_rows-4;r++){
+      if (board[r][c]===player && board[r+1][c]===player && board[r+2][c]===player && board[r+3][c]===player) return true;
+    }
+  }
+  // diag down-right
+  for (let r=0;r<=c4_rows-4;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      if (board[r][c]===player && board[r+1][c+1]===player && board[r+2][c+2]===player && board[r+3][c+3]===player) return true;
+    }
+  }
+  // diag up-right
+  for (let r=3;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      if (board[r][c]===player && board[r-1][c+1]===player && board[r-2][c+2]===player && board[r-3][c+3]===player) return true;
+    }
+  }
+  return false;
+}
+
+function isBoardFull(board){
+  for (let c=0;c<c4_cols;c++) if (firstEmptyRow(c) !== -1) return false;
+  return true;
+}
+
+/* Simple heuristic evaluation:
+   - Score center column occupancy.
+   - Score runs of 2/3 for CPU and subtract for player.
+*/
+function evaluateBoard(board){
+  let score = 0;
+  // center column preference for CPU
+  const centerCol = Math.floor(c4_cols/2);
+  for (let r=0;r<c4_rows;r++){
+    if (board[r][centerCol] === 2) score += 3;
+    else if (board[r][centerCol] === 1) score -= 3;
+  }
+  // evaluate all windows of length 4
+  function evaluateWindow(windowArr){
+    const cpuCount = windowArr.filter(x=>x===2).length;
+    const playerCount = windowArr.filter(x=>x===1).length;
+    const emptyCount = windowArr.filter(x=>x===0).length;
+    let s = 0;
+    if (cpuCount === 4) s += 1000;
+    else if (cpuCount === 3 && emptyCount ===1) s += 50;
+    else if (cpuCount === 2 && emptyCount ===2) s += 10;
+    if (playerCount === 3 && emptyCount ===1) s -= 80;
+    else if (playerCount === 2 && emptyCount ===2) s -= 8;
+    return s;
+  }
+  // horizontal
+  for (let r=0;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      const windowArr = [board[r][c], board[r][c+1], board[r][c+2], board[r][c+3]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  // vertical
+  for (let c=0;c<c4_cols;c++){
+    for (let r=0;r<=c4_rows-4;r++){
+      const windowArr = [board[r][c], board[r+1][c], board[r+2][c], board[r+3][c]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  // diag down-right
+  for (let r=0;r<=c4_rows-4;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      const windowArr = [board[r][c], board[r+1][c+1], board[r+2][c+2], board[r+3][c+3]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  // diag up-right
+  for (let r=3;r<c4_rows;r++){
+    for (let c=0;c<=c4_cols-4;c++){
+      const windowArr = [board[r][c], board[r-1][c+1], board[r-2][c+2], board[r-3][c+3]];
+      score += evaluateWindow(windowArr);
+    }
+  }
+  return score;
+}
+
+/* Generate list of valid columns (not full) */
+function validColumns(board){
+  const cols = [];
+  for (let c=0;c<c4_cols;c++) if (board[0][c] === 0) cols.push(c);
+  return cols;
+}
+
+/* copy board */
+function copyBoard(board){
+  return board.map(row => row.slice());
+}
+
+/* apply move */
+function applyMove(board, col, player){
+  const nb = copyBoard(board);
+  for (let r=c4_rows-1;r>=0;r--){
+    if (nb[r][col] === 0) { nb[r][col] = player; break; }
+  }
+  return nb;
+}
+
+/* Root wrapper: returns [score, bestCol] from minimax */
+function c4_minimaxRoot(board, depth){
+  const cols = validColumns(board);
+  let bestScore = -Infinity;
+  let bestCol = null;
+  for (const col of cols){
+    const nb = applyMove(board, col, 2); // cpu move
+    const score = c4_minimax(nb, depth-1, -Infinity, Infinity, false);
+    if (score > bestScore) { bestScore = score; bestCol = col; }
+  }
+  return [bestScore, bestCol];
+}
+
+/* minimax with alpha-beta pruning:
+   playerTurn: true if CPU's turn (maximizer), false if human (minimizer)
+*/
+function c4_minimax(board, depth, alpha, beta, maximizingPlayer){
+  if (checkWinBoard(board, 2)) return 100000; // cpu wins
+  if (checkWinBoard(board, 1)) return -100000; // player wins
+  if (depth === 0 || isBoardFull(board)) return evaluateBoard(board);
+
+  const cols = validColumns(board);
+  if (maximizingPlayer){
+    let value = -Infinity;
+    for (const col of cols){
+      const nb = applyMove(board, col, 2);
+      const score = c4_minimax(nb, depth-1, alpha, beta, false);
+      value = Math.max(value, score);
+      alpha = Math.max(alpha, value);
+      if (alpha >= beta) break;
+    }
+    return value;
+  } else {
+    let value = Infinity;
+    for (const col of cols){
+      const nb = applyMove(board, col, 1);
+      const score = c4_minimax(nb, depth-1, alpha, beta, true);
+      value = Math.min(value, score);
+      beta = Math.min(beta, value);
+      if (alpha >= beta) break;
+    }
+    return value;
   }
 }
 </script>
-
 </body>
 </html>
