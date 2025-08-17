@@ -315,7 +315,7 @@ function startConnect4(){
   function playerMove(col){if(drop(col,"O")){render();if(checkWin("O")){gameOver=true;next.classList.remove("hidden");}else cpuMove();}}
   function cpuMove(){if(gameOver)return;
     drop(Math.floor(Math.random()*7),"X");render();
-    if(Math.random()<0.2 && cheatCount<maxCheats){cheatCount++;setTimeout(()=>{drop(Math.floor(Math.random()*7),"X");render();},200);haha.style.opacity=1;setTimeout(()=>{haha.style.opacity=0;},1000);}
+    if(Math.random()<0.1 && cheatCount<maxCheats){cheatCount++;setTimeout(()=>{drop(Math.floor(Math.random()*7),"X");render();},200);haha.style.opacity=1;setTimeout(()=>{haha.style.opacity=0;},1000);}
     if(checkWin("X"))gameOver=true;}
   reset.onclick=init;init();
 }
