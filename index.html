@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <title>Sam</title>
 <style>
-  /* Base + site-wide styles — kept from your working version */
   * { box-sizing: border-box; }
   html,body { height:100%; }
   body {
@@ -18,7 +17,6 @@
 
   .puzzle-section { display: none; margin-top: 20px; }
 
-  /* Code entry (locked-in look) */
   .code-input {
     width: 40px; height: 40px;
     text-align: center; font-size: 24px; margin: 5px;
@@ -27,7 +25,7 @@
     text-transform: uppercase;
   }
 
-  /* Puzzle1: tic-tac-toe / outer ring (kept) */
+
   .outer-ring {
     display: grid;
     grid-template-columns: repeat(5, 60px);
@@ -43,14 +41,12 @@
   #result { font-size:24px; margin-top:12px; min-height:28px; }
   button { margin-top:12px; padding:10px 20px; font-size:16px; }
 
-  /* Align Reset and Next buttons horizontally */
   #puzzle1 button {
-    display: inline-block; /* Ensure buttons are inline */
-    margin: 0 10px; /* Add spacing between buttons */
-    vertical-align: middle; /* Align buttons vertically */
+    display: inline-block;
+    margin: 0 10px;
+    vertical-align: middle;
   }
 
-  /* Puzzle2 crossword (kept and scoped) */
   #puzzle2 .crossword { border-collapse:collapse; table-layout:fixed; margin:60px auto 12px auto; }
   #puzzle2 .crossword td { position:relative; width:40px; height:40px; border:1px solid #444 !important; padding:0; background:#111; }
   #puzzle2 .crossword td.black { background:#000 !important; }
@@ -59,7 +55,6 @@
   #crossword-wrapper { display:flex; flex-direction:column; align-items:center; width:100%; }
   #crossword-clues { text-align:left; max-width:600px; margin:8px auto 24px auto; color:white; }
 
-  /* Puzzle3 clock (scoped to puzzle3) */
   #puzzle3 .clock-wrapper { margin-top:30px; display:flex; flex-direction:column; align-items:center; gap:12px; }
   #puzzle3 .clock { display:flex; align-items:center; gap:12px; font-family:inherit; color:white; font-size:48px; letter-spacing:2px; }
   #puzzle3 .half { display:flex; flex-direction:column; align-items:center; min-width:90px; }
@@ -67,17 +62,16 @@
   #puzzle3 .prime-btn { margin-top:8px; padding:8px 12px; font-size:14px; cursor:pointer; }
   #puzzle3 #next3 { display:none; margin-top:8px; }
 
-  /* Puzzle4 Connect Four (scoped) */
   #puzzle4 .c4-wrapper { margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:12px; }
   #puzzle4 .c4-board { display:grid; grid-template-columns: repeat(7, 56px); grid-gap:6px; background:transparent; padding:6px; }
   #puzzle4 .c4-cell { width: 60px; height: 60px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); }
   #puzzle4 .disc { width:44px; height:44px; border-radius:50%; background:transparent; box-shadow: 0 1px 0 rgba(255,255,255,0.03) inset; }
-  #puzzle4 .disc.player { background: #ffd54f; }   /* player color (O-ish) */
-  #puzzle4 .disc.cpu { background: #ff6b6b; }      /* cpu color (X-ish) */
+  #puzzle4 .disc.player { background: #ffd54f; }
+  #puzzle4 .disc.cpu { background: #ff6b6b; }
   #puzzle4 .c4-controls { display:flex; gap:8px; align-items:center; }
   #c4-status { margin-top:8px; min-height:24px; }
   #c4-reset { margin-left:8px; }
-  /* pointer-none when disabled */
+
   .disabled { pointer-events: none; opacity: 0.7; }
 
   .connect4-board {
@@ -98,7 +92,7 @@
   .rainbow-link {
     font-size: 20px;
     text-decoration: underline;
-    animation: rainbow 2s infinite; /* Apply the rainbow animation */
+    animation: rainbow 2s infinite;
   }
 
   @keyframes rainbow {
@@ -112,18 +106,17 @@
   }
 
   #puzzle1 {
-    text-align: center; /* Center all content in Puzzle 1 */
+    text-align: center;
   }
 
   #puzzle1 button {
-    display: block; /* Make buttons stack vertically */
-    margin: 10px auto; /* Center buttons horizontally and add spacing */
+    display: block;
+    margin: 10px auto;
   }
 </style>
 </head>
 <body>
 
-<!-- Code entry -->
 <div id="code-entry" class="puzzle-section" style="display:block;">
   <h1>Enter Code.</h1>
   <div>
@@ -194,20 +187,19 @@
 <div id="puzzle4" class="puzzle-section">
   <h2>Win.</h2>
   <div class="connect4-board" id="c4Board"></div>
-  <div id="c4Status" style="margin-top: 10px; font-size: 18px; color: white;"></div> <!-- Status message -->
+  <div id="c4Status" style="margin-top: 10px; font-size: 18px; color: white;"></div>
   <button id="c4Reset">Reset</button>
   <div id="haha" class="haha">haha</div>
   <button id="p4Next" class="hidden" onclick="showSection('puzzle5')">Next</button>
 </div>
 
-<!-- Puzzle 5 (End Screen) -->
+<!-- End Screen -->
 <div id="puzzle5" class="puzzle-section">
   <h1>Congratulations!</h1>
   <p id="endMessage" style="margin: 20px; font-size: 18px; color: white;"></p>
 </div>
 
 <script>
-/* ---------- Section switching / code entry (unchanged behaviour) ---------- */
 function showSection(id) {
   document.querySelectorAll('.puzzle-section').forEach(sec => sec.style.display = 'none');
   const el = document.getElementById(id);
@@ -216,10 +208,9 @@ function showSection(id) {
   if (id === 'puzzle2') buildCrossword();
   if (id === 'puzzle3') initPuzzle3();
   if (id === 'puzzle4') startConnect4();
-  if (id === 'puzzle5') initEndScreen(); // Initialize the end screen
+  if (id === 'puzzle5') initEndScreen();
 }
 
-/* Code entry */
 const codeInputs = document.querySelectorAll('.code-input');
 codeInputs.forEach((input, index) => {
   input.addEventListener('input', () => {
@@ -237,7 +228,7 @@ function checkCode(){
   }
 }
 
-/* ---------- Puzzle 1 (kept as before) ---------- */
+/* ---------- Puzzle 1 ---------- */
 let outerRing = [];
 let gameActive = true;
 const innerToOuter = [6,7,8,11,12,13,16,17,18];
@@ -330,7 +321,7 @@ function isTieInner(){ return innerToOuter.every(i=>outerRing[i]!==null); }
 function isExtendedWinO(){ return extendedTriplets.some(tri=>tri.every(i=>outerRing[i]==='O')); }
 document.getElementById('reset-btn').addEventListener('click', startPuzzle1);
 
-/* ---------- Puzzle 2 (crossword) ---------- */
+/* ---------- Puzzle 2 ---------- */
 function buildCrossword(){
   const container = document.getElementById('crossword-container');
   container.innerHTML='';
@@ -359,7 +350,7 @@ function checkCrossword(){
   if (correct) document.getElementById('next2').style.display='inline-block';
 }
 
-/* ---------- Puzzle 3 (single "Prime Time?" button) ---------- */
+/* ---------- Puzzle 3 ---------- */
 let puzzle3Interval = null;
 const primesUnder60 = new Set([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59]);
 
@@ -379,7 +370,7 @@ function updateClock(){
 }
 
 function isPrime(num) {
-  return primesUnder60.has(num); // Check if the number is in the set of primes
+  return primesUnder60.has(num);
 }
 
 function checkPrimeTimeBoth() {
@@ -393,13 +384,13 @@ function checkPrimeTimeBoth() {
   if (!isPrime(mm)) messages.push(`${minuteText} isn't prime.`);
 
   if (messages.length > 0) {
-    alert(messages.join('\n')); // Show why the time isn't valid
+    alert(messages.join('\n'));
   } else {
-    document.getElementById('next3').style.display = 'inline-block'; // Show the "Next" button
+    document.getElementById('next3').style.display = 'inline-block';
   }
 }
 
-/* ---------------- Puzzle 4: Connect 4 ---------------- */
+/* ---------------- Puzzle 4 ---------------- */
 function startConnect4() {
   const boardEl = document.getElementById("c4Board");
   const reset = document.getElementById("c4Reset");
@@ -416,8 +407,8 @@ function startConnect4() {
     boardEl.innerHTML = "";
     gameOver = false;
     cheatCount = 0;
-    next.style.display = "none"; // Ensure "Next" button is hidden at the start
-    status.textContent = ""; // Clear any previous win/loss messages
+    next.style.display = "none";
+    status.textContent = "";
     for (let r = 0; r < 6; r++) {
       for (let c = 0; c < 7; c++) {
         const cell = document.createElement("div");
@@ -437,12 +428,12 @@ function startConnect4() {
         const idx = r * 7 + c;
         const cell = boardEl.children[idx];
         const value = board[r][c];
-        cell.textContent = ""; // Clear text content
-        cell.style.backgroundColor = ""; // Clear background color
+        cell.textContent = ""; 
+        cell.style.backgroundColor = ""; 
         if (value === "O") {
-          cell.style.backgroundColor = "#ffd54f"; // Yellow for player
+          cell.style.backgroundColor = "#ffd54f"; 
         } else if (value === "X") {
-          cell.style.backgroundColor = "#ff6b6b"; // Red for CPU
+          cell.style.backgroundColor = "#ff6b6b"; 
         }
       }
     }
@@ -493,8 +484,8 @@ function startConnect4() {
       render();
       if (checkWin("O")) {
         gameOver = true;
-        status.textContent = "You win!"; // Display win message
-        next.style.display = "inline-block"; // Show "Next" button when player wins
+        status.textContent = "You win!"; 
+        next.style.display = "inline-block"; 
       } else cpuMove();
     }
   }
@@ -507,8 +498,7 @@ function startConnect4() {
       drop(bestMove, "X");
       render();
 
-      // CPU cheats with a 1 in 5 chance
-      if (Math.random() < 0.2 && cheatCount < maxCheats) {
+      if (Math.random() < 0.3 && cheatCount < maxCheats) {
         cheatCount++;
         setTimeout(() => {
           const cheatCol = findCheatMove();
@@ -525,7 +515,7 @@ function startConnect4() {
 
       if (checkWin("X")) {
         gameOver = true;
-        status.textContent = "CPU wins!"; // Display loss message
+        status.textContent = "CPU wins!";
       }
     }
   }
@@ -559,11 +549,11 @@ function startConnect4() {
   }
 
   function minimax(board, depth, isMaximizing, alpha, beta) {
-    if (checkWin("X")) return 1000 - depth; // CPU wins
-    if (checkWin("O")) return depth - 1000; // Player wins
-    if (isBoardFull()) return 0; // Tie
+    if (checkWin("X")) return 1000 - depth; 
+    if (checkWin("O")) return depth - 1000; 
+    if (isBoardFull()) return 0; 
 
-    if (depth >= 5) return 0; // Limit depth for performance
+    if (depth >= 5) return 0; 
 
     if (isMaximizing) {
       let maxEval = -Infinity;
@@ -574,7 +564,7 @@ function startConnect4() {
           undoDrop(col);
           maxEval = Math.max(maxEval, eval);
           alpha = Math.max(alpha, eval);
-          if (beta <= alpha) break; // Alpha-beta pruning
+          if (beta <= alpha) break; 
         }
       }
       return maxEval;
@@ -587,7 +577,7 @@ function startConnect4() {
           undoDrop(col);
           minEval = Math.min(minEval, eval);
           beta = Math.min(beta, eval);
-          if (beta <= alpha) break; // Alpha-beta pruning
+          if (beta <= alpha) break; 
         }
       }
       return minEval;
@@ -611,32 +601,28 @@ function startConnect4() {
   init();
 }
 
-/* ---------- End Screen Initialization ---------- */
+/* ---------- End Screen ---------- */
 function initEndScreen() {
   const endMessage = document.getElementById('endMessage');
 
-  // Dates for calculations
   const now = new Date();
   const birthdayEnd = new Date('2025-08-07T23:59:59');
   const graduationEnd = new Date('2025-07-02T16:00:00');
 
-  // Calculate time differences
   const timeSinceBirthday = calculateTimeDifference(birthdayEnd, now);
   const timeSinceGraduation = calculateTimeDifference(graduationEnd, now);
 
-  // Construct the message
   const message = `
     I would say happy birthday but we're ${timeSinceBirthday} late for that.
     And I would say happy end of uni but you graduated ${timeSinceGraduation} ago.
     So instead just... good job, <a href="https://youtu.be/DKP16d_WdZM?si=XefS5Cimp7d6nUhw" target="_blank" class="rainbow-link">Click here for your prize!</a>
   `;
 
-  // Set the message
   endMessage.innerHTML = message;
 }
 
 function calculateTimeDifference(startDate, endDate) {
-  const diffMs = endDate - startDate; // Difference in milliseconds
+  const diffMs = endDate - startDate;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
